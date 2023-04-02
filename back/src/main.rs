@@ -1,5 +1,4 @@
 #[macro_use] extern crate rocket;
-#[path = "./routes/user.rs"] pub mod user_route;
 
 mod controllers;
 mod routes;

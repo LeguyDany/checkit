@@ -14,12 +14,12 @@ pub struct AddUser<'a> {
 }
 
 impl User {
-    pub fn get_id_by_username(inputname: &str) -> Vec<User> {
+    pub fn get_user_by_username(inputname: &str) -> Vec<User> {
         let conn = &mut back::establish_connection();
         use back::schema::user::dsl::{user, username};
 
         let users = user
-            .filter(username.eq(inputname.trim()))
+            .filter(username.like(format!("%{}%", inputname.trim_end())))
             .load::<User>(conn)
             .expect("Error loading posts");
 
@@ -39,19 +39,16 @@ impl User {
             .expect("Error saving new post")
     }
 
-    pub fn read() {
+    pub fn read(num_user:i64) -> Vec<User> {
         use back::schema::user::dsl::*;
 
         let connection = &mut back::establish_connection();
         let results = user
             .filter(isnotionoauth.eq(false))
-            .limit(5)
+            .limit(num_user)
             .load::<User>(connection)
             .expect("Error loading posts");
 
-        println!("Displaying {} users:", results.len());
-        for guy in results {
-            println!("Username: {} | Password: {}", guy.username, guy.pwd);
-        }
+        return results;
     }
 }
