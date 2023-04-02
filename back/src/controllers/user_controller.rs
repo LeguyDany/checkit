@@ -20,6 +20,19 @@ pub struct AddUser<'a> {
 }
 
 impl User {
+    pub fn get_user_by_id(id: Uuid) -> User {
+        let conn = &mut back::establish_connection();
+        use back::schema::user::dsl::{user};
+
+        let mut user_filtered = user
+            .find(id)
+            .load::<User>(conn)
+            .expect("Error loading posts");
+
+        let response:User = user_filtered.remove(0);
+        response
+    }
+
     pub fn get_user_by_username(inputname: &str) -> Vec<User> {
         let conn = &mut back::establish_connection();
         use back::schema::user::dsl::{user, username};
@@ -71,7 +84,7 @@ impl User {
         response
     }
 
-    pub fn update_username(
+    pub fn update(
         id: &str,
         update_value: &str,
         is_username: &bool,

@@ -5,7 +5,8 @@ mod controllers;
 mod routes;
 mod models;
 
-use self::routes::user::routes;
+use self::routes::user;
+use self::routes::auth;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -16,5 +17,6 @@ fn index() -> &'static str {
 fn rocket() -> _ {
     rocket::build()
         .mount("/", routes![index])
-        .mount("/users", routes())
+        .mount("/users", user::routes())
+        .mount("/auth", auth::routes())
 }

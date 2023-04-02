@@ -37,7 +37,7 @@ fn delete_user(id: &str) -> Json<HashMap<String, String>> {
 
 #[put("/update_user", data = "<data>", format = "application/json")]
 fn update_user(data: Json<UpdatedUser>) -> Json<Result<User, String>> {
-    let execute = User::update_username(&data.id, &data.updated_value, &data.is_username);
+    let execute = User::update(&data.id, &data.updated_value, &data.is_username);
 
     match execute {
         Ok(o) => Json(Ok(o)),
