@@ -1,1 +1,2 @@
-pub mod userController;
+pub mod user_controller;
+pub mod auth_controller;

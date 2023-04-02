@@ -1,7 +1,9 @@
 #[macro_use] extern crate rocket;
 
+mod helpers;
 mod controllers;
 mod routes;
+mod models;
 
 use self::routes::user::routes;
 
