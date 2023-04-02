@@ -1,8 +1,11 @@
 use diesel::prelude::*;
 use chrono::NaiveDateTime;
+
+use serde::Serialize;
 use uuid::Uuid;
 
-#[derive(Queryable)]
+
+#[derive(Queryable, Serialize)]
 pub struct User {
     pub userid: Uuid,
     pub username: String,
