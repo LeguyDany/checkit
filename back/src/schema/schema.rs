@@ -31,6 +31,7 @@ diesel::table! {
         isnotionoauth -> Bool,
         lastlogin -> Nullable<Timestamp>,
         datecreated -> Timestamp,
+        token -> Nullable<Varchar>,
     }
 }
 

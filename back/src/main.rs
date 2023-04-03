@@ -4,6 +4,8 @@ mod helpers;
 mod controllers;
 mod routes;
 mod models;
+mod utils;
+mod schema;
 
 use self::routes::user;
 use self::routes::auth;

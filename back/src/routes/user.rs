@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::controllers::user_controller::AddUser;
+use crate::{controllers::user_controller::AddUser, models::response::Response};
 use rocket::serde::json::Json;
 use rocket::Route;
 
@@ -19,9 +19,12 @@ fn get_users(num: &str) -> Json<Vec<User>> {
 }
 
 #[post("/addUser", data = "<user>", format = "application/json")]
-fn add_user(user: Json<AddUser>) -> Json<User> {
+fn add_user(user: Json<AddUser>) -> Result<Json<Response<User>>, Json<Response<String>>> {
     let users = User::add(user.username, user.pwd);
-    return Json(users);
+    match users {
+        Ok(o) => Ok(Json(o)),
+        Err(e) => Err(Json(e))
+    }
 }
 
 #[delete("/delete/<id>")]
@@ -34,8 +37,7 @@ fn delete_user(id: &str) -> Json<HashMap<String, String>> {
     Json(response)
 }
 
-
-#[put("/update_user", data = "<data>", format = "application/json")]
+#[patch("/update_user", data = "<data>", format = "application/json")]
 fn update_user(data: Json<UpdatedUser>) -> Json<Result<User, String>> {
     let execute = User::update(&data.id, &data.updated_value, &data.is_username);
 

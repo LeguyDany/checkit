@@ -8,7 +8,8 @@ CREATE TABLE "user" (
   pwd VARCHAR NOT NULL,
   isnotionoauth BOOLEAN NOT NULL DEFAULT FALSE,
   lastlogin TIMESTAMP,
-  datecreated TIMESTAMP NOT NULL DEFAULT now()
+  datecreated TIMESTAMP NOT NULL DEFAULT now(),
+  token VARCHAR
 );
 
 CREATE TABLE template (

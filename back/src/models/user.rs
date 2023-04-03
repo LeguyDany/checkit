@@ -12,7 +12,7 @@ pub struct UpdatedUser {
     pub is_username: bool,
 }
 
-#[derive(Queryable, Serialize)]
+#[derive(Queryable, serde::Serialize, Clone)]
 pub struct User {
     pub userid: Uuid,
     pub username: String,
@@ -20,4 +20,5 @@ pub struct User {
     pub isnotionoauth: bool,
     pub lastlogin: Option<NaiveDateTime>,
     pub datecreated: NaiveDateTime,
+    pub token: Option<String>,
 }

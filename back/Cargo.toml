@@ -20,3 +20,4 @@ serde = { version = "1.0.101", features = ["derive"] }
 cargo-watch = "8.4.0"
 bcrypt = "0.14"
 jsonwebtoken = "8"
+dotenv = "0.15.0"

@@ -1,7 +1,3 @@
-
-#[path = "./models/user.rs"] pub mod user;
-#[path = "./models/schema.rs"] pub mod schema;
-
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenvy::dotenv;

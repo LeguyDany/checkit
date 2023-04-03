@@ -1,4 +1,4 @@
-use back::schema::user;
+use crate::{models::response::Response, schema::schema::user};
 use diesel::Insertable;
 use serde::Deserialize;
 use uuid::Uuid;
@@ -22,20 +22,20 @@ pub struct AddUser<'a> {
 impl User {
     pub fn get_user_by_id(id: Uuid) -> User {
         let conn = &mut back::establish_connection();
-        use back::schema::user::dsl::{user};
+        use crate::schema::schema::user::dsl::user;
 
         let mut user_filtered = user
             .find(id)
             .load::<User>(conn)
             .expect("Error loading posts");
 
-        let response:User = user_filtered.remove(0);
+        let response: User = user_filtered.remove(0);
         response
     }
 
     pub fn get_user_by_username(inputname: &str) -> Vec<User> {
         let conn = &mut back::establish_connection();
-        use back::schema::user::dsl::{user, username};
+        use crate::schema::schema::user::dsl::{user, username};
 
         let users = user
             .filter(username.like(format!("%{}%", inputname.trim_end())))
@@ -64,7 +64,7 @@ impl User {
 
         let conn = &mut back::establish_connection();
 
-        use back::schema::user::dsl::{user, userid};
+        use crate::schema::schema::user::dsl::{user, userid};
         match diesel::delete(user.filter(userid.eq(input_uuid))).execute(conn) {
             Ok(res) => {
                 if res.to_string().parse::<i32>().unwrap() > 0 {
@@ -84,13 +84,9 @@ impl User {
         response
     }
 
-    pub fn update(
-        id: &str,
-        update_value: &str,
-        is_username: &bool,
-    ) -> Result<User, String> {
+    pub fn update(id: &str, update_value: &str, is_username: &bool) -> Result<User, String> {
         use crate::helpers::str_helper::StrChange;
-        use back::schema::user::dsl::{pwd, user, userid, username};
+        use crate::schema::schema::user::dsl::{pwd, user, userid, username};
         let user_uuid = StrChange::to_uuid(id).unwrap();
 
         let conn = &mut back::establish_connection();
@@ -135,22 +131,34 @@ impl User {
     ///
     ///  let post = User::add(&username, &pwd);
     /// ```
-    pub fn add(username_input: &str, pwd: &str) -> User {
+    pub fn add(username_input: &str, pwd: &str) -> Result<Response<User>, Response<String>> {
         let conn = &mut back::establish_connection();
+
+        let already_exist = User::get_user_by_username(username_input);
+        if already_exist.len() > 0 {
+            return Err(Response {
+                success: false,
+                data: "User already exists. Pick another username.".to_string(),
+            });
+        }
+
         let password_hash = hash(pwd.trim_end(), DEFAULT_COST).unwrap();
         let new_post = AddUser {
             username: username_input.trim_end(),
             pwd: &password_hash,
         };
 
-        diesel::insert_into(user::table)
-            .values(&new_post)
-            .get_result(conn)
-            .expect("Error saving new post: {}")
+        Ok(Response {
+            success: true,
+            data: diesel::insert_into(user::table)
+                .values(&new_post)
+                .get_result(conn)
+                .expect("Error saving new post: {}"),
+        })
     }
 
     pub fn read(num_user: i64) -> Vec<User> {
-        use back::schema::user::dsl::*;
+        use crate::schema::schema::user::dsl::*;
 
         let connection = &mut back::establish_connection();
         let results = user
