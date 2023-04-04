@@ -1,14 +1,4 @@
-use std::env;
-
-use rocket::futures::stream::PollNext;
-// use diesel::sql_types::Json;
-// use jsonwebtoken::errors::Result;
-// use jsonwebtoken::TokenData;
-use uuid::Uuid;
-
 use diesel::prelude::*;
-
-use crate::helpers::str_helper::StrChange;
 use crate::models::auth::Auth;
 use crate::models::response::Response;
 use crate::models::user::User;
@@ -70,5 +60,22 @@ impl Auth {
             }
             Err(e) => Err(e),
         }
+    }
+
+    pub fn logout(encoded_token: String) -> Response<String>{
+        use crate::schema::schema::user::dsl::{user, userid, token};
+
+        let token_decoded = Auth::decode_token(encoded_token).unwrap().data.user_token;
+
+        let conn = &mut back::establish_connection();
+
+         match diesel::update(user.filter(userid.eq(&token_decoded.userid)))
+            .set(token.eq(None::<String>))
+            .execute(conn) {
+                Ok(_) => {
+                    return Response{success: true, data: "User successfully logged out.".to_string()}
+                },
+                Err(e) => {return Response{success: false, data: format!("Could not set the token to null: {}", e.to_string())}}
+            }
     }
 }

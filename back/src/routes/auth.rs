@@ -12,7 +12,6 @@ fn login(data: Json<LoginId>) -> Json<Response<String>> {
 
 #[get("/check_logged_in")]
 fn check_user_is_logged_in(token: AuthorizationToken) -> Json<Response<String>> {
-    let cloning = token.clone();
     let res = Auth::check_login(token.0);
 
     match res {
@@ -25,10 +24,16 @@ fn check_user_is_logged_in(token: AuthorizationToken) -> Json<Response<String>> 
     }
 }
 
+#[get("/logout")]
+fn logout(token: AuthorizationToken) -> Json<Response<String>> {
+    let res = Auth::logout(token.0);
+    Json(res)
+}
 
 pub fn routes() -> Vec<Route> {
     routes![
         login,
-        check_user_is_logged_in
+        check_user_is_logged_in,
+        logout
     ]
 }

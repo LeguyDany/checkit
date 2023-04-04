@@ -10,12 +10,12 @@ use crate::models::{
     response::Response,
 };
 
-use std::time::Duration;
-
 use rocket::request::{self, FromRequest, Request};
 use rocket::{http::Status, outcome::Outcome};
 
 use crate::models::auth::{AuthorizationError, AuthorizationToken};
+
+use crate::configs::date::MONTH_IN_SEC;
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthorizationToken {
@@ -47,11 +47,11 @@ impl Auth {
             lastlogin: user.lastlogin,
         };
 
-        let now = Utc::now().timestamp_nanos() / 1_000_000_000;
+        let now = (Utc::now().timestamp_nanos() / 1_000_000_000) as u32;
 
         let payload = Auth {
             user_token: user_info,
-            exp: (now + 60) as usize,
+            exp: (now + MONTH_IN_SEC) as usize,
         };
 
         dotenv().ok();

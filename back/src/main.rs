@@ -6,6 +6,7 @@ mod routes;
 mod models;
 mod utils;
 mod schema;
+mod configs;
 
 use self::routes::user;
 use self::routes::auth;
