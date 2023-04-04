@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE "user" (
   userid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  username VARCHAR NOT NULL,
+  username VARCHAR UNIQUE NOT NULL,
   pwd VARCHAR NOT NULL,
   isnotionoauth BOOLEAN NOT NULL DEFAULT FALSE,
   lastlogin TIMESTAMP,

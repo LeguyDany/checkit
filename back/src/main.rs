@@ -2,14 +2,14 @@
 
 mod helpers;
 mod controllers;
-mod routes;
+mod contracts;
 mod models;
 mod utils;
 mod schema;
 mod configs;
 
-use self::routes::user;
-use self::routes::auth;
+use self::contracts::user;
+use self::contracts::auth;
 
 #[get("/")]
 fn index() -> &'static str {

@@ -33,16 +33,14 @@ impl User {
         response
     }
 
-    pub fn get_user_by_username(inputname: &str) -> Vec<User> {
+    pub fn get_user_by_username(inputname: &str) -> Option<User> {
         let conn = &mut back::establish_connection();
         use crate::schema::schema::user::dsl::{user, username};
 
-        let users = user
-            .filter(username.like(format!("%{}%", inputname.trim_end())))
-            .load::<User>(conn)
-            .expect("Error loading posts");
-
-        return users;
+        user
+            .filter(username.eq(inputname))
+            .first::<User>(conn)
+            .ok()
     }
 
     pub fn delete(id: &str) -> Vec<String> {
@@ -134,8 +132,8 @@ impl User {
     pub fn add(username_input: &str, pwd: &str) -> Result<Response<User>, Response<String>> {
         let conn = &mut back::establish_connection();
 
-        let already_exist = User::get_user_by_username(username_input);
-        if already_exist.len() > 0 {
+        let already_exist:Option<User> = User::get_user_by_username(username_input);
+        if already_exist.is_some() {
             return Err(Response {
                 success: false,
                 data: "User already exists. Pick another username.".to_string(),

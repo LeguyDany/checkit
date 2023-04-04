@@ -7,9 +7,13 @@ use rocket::Route;
 use crate::models::user::{User, UpdatedUser};
 
 #[get("/<name>")]
-fn search_users(name: &str) -> Json<Vec<User>> {
+fn search_users(name: &str) -> Result<Json<Response<User>>, Json<Response<String>>> {
     let users = User::get_user_by_username(name);
-    return Json(users);
+    match users {
+        Some(o) => Ok(Json(Response{success: true, data:o})),
+        None => Err(Json(Response{success: false, data:"Could not find any user by that username.".to_string()}))
+    }
+    
 }
 
 #[get("/getUsers/<num>")]
