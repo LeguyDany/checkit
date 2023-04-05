@@ -62,6 +62,7 @@ impl Auth {
                 return Err(Response {
                     success: false,
                     data: "No secret found.".to_string(),
+                    status: 400
                 })
             }
         };
@@ -78,12 +79,14 @@ impl Auth {
                 return Ok(Response {
                     success: true,
                     data: o.to_string(),
+                    status: 200
                 });
             }
             Err(e) => {
                 return Err(Response {
                     success: false,
                     data: format!("An error has occured: {}", e.to_string()),
+                    status: 400 as u16
                 })
             }
         }
@@ -99,6 +102,7 @@ impl Auth {
                 return Err(Response {
                     success: false,
                     data: "No secret found.".to_string(),
+                    status: 400
                 })
             }
         };
@@ -113,10 +117,12 @@ impl Auth {
             Ok(o) => Ok(Response {
                 success: true,
                 data: o.claims,
+                status: 200
             }),
             Err(e) => Err(Response {
                 success: false,
                 data: format!("An error has occured: {}", e),
+                status: 400
             }),
         }
     }

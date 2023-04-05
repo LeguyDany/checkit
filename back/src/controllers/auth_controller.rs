@@ -34,12 +34,14 @@ impl Auth {
                 Response {
                     data: "No user with this username.".to_string(),
                     success: false,
+                    status: 200
                 }
             },
             None => {
                 return Response {
                     success: false,
                     data: "User input invalid, the user doesn't exist in the database.".to_string(),
+                    status: 400
                 };
             }
         }
@@ -65,6 +67,7 @@ impl Auth {
                     success: false,
                     data: "You are trying to login with a non-valid token. Please, log in again."
                         .to_string(),
+                    status: 400
                 });
             }
             Err(e) => Err(e),
@@ -86,12 +89,14 @@ impl Auth {
                 return Response {
                     success: true,
                     data: "User successfully logged out.".to_string(),
+                    status: 200
                 }
             }
             Err(e) => {
                 return Response {
                     success: false,
                     data: format!("Could not set the token to null: {}", e.to_string()),
+                    status: 400
                 }
             }
         }

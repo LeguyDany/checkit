@@ -8,6 +8,9 @@ use diesel::prelude::*;
 
 use bcrypt::{hash, DEFAULT_COST};
 
+use rocket::http::Status;
+use rocket::response::status;
+
 /// # Arguments
 ///
 /// pub username: &'a str,
@@ -20,7 +23,9 @@ pub struct AddUser<'a> {
 }
 
 impl User {
-    pub fn get_user_by_id(id: Uuid) -> User {
+    
+    #[allow(dead_code)]
+    pub fn get_user_by_id(id: Uuid) -> Response<User> {
         let conn = &mut back::establish_connection();
         use crate::schema::schema::user::dsl::user;
 
@@ -30,33 +35,28 @@ impl User {
             .expect("Error loading posts");
 
         let response: User = user_filtered.remove(0);
-        response
+        Response { success: true, data: response, status: 200 }
     }
 
     pub fn get_user_by_username(inputname: &str) -> Option<User> {
         let conn = &mut back::establish_connection();
         use crate::schema::schema::user::dsl::{user, username};
 
-        user
-            .filter(username.eq(inputname))
-            .first::<User>(conn)
-            .ok()
+        user.filter(username.eq(inputname)).first::<User>(conn).ok()
     }
 
-    pub fn delete(id: &str) -> Vec<String> {
+    pub fn delete(id: &str) -> Result<Response<String>, Response<String>> {
         use crate::helpers::str_helper::StrChange;
 
-        let mut response = Vec::new();
         let input_uuid: Uuid;
 
         match StrChange::to_uuid(id) {
             Ok(o) => {
                 input_uuid = o;
             }
-            Err(x) => {
-                response.push("Error".to_owned());
-                response.push(x);
-                return response;
+            Err(e) => {
+                println!("{}", status::Custom(Status::BadRequest, e.to_string()).0);
+                return Err(Response{success: false, data: e.to_string(), status: 400});
             }
         }
 
@@ -66,23 +66,26 @@ impl User {
         match diesel::delete(user.filter(userid.eq(input_uuid))).execute(conn) {
             Ok(res) => {
                 if res.to_string().parse::<i32>().unwrap() > 0 {
-                    response.push("Success".to_owned());
-                    response.push(format!("{} user deleted.", res.to_string()));
+                    Ok(Response {
+                        success: true,
+                        data: format!("{} user deleted.", res.to_string()),
+                        status: 200
+                    })
                 } else {
-                    response.push("Error".to_owned());
-                    response.push("There isn't any user with that uuid.".to_owned());
+                    Ok(Response {
+                        success: false,
+                        data: "There isn't any user with that uuid.".to_owned(),
+                        status: 200
+                    })
                 }
             }
             Err(e) => {
-                response.push("Error".to_owned());
-                response.push(e.to_string());
+                return Err(Response{success: false, data: e.to_string(), status: 400});
             }
         }
-
-        response
     }
 
-    pub fn update(id: &str, update_value: &str, is_username: &bool) -> Result<User, String> {
+    pub fn update(id: &str, update_value: &str, is_username: &bool) -> Result<Response<User>, Response<String>> {
         use crate::helpers::str_helper::StrChange;
         use crate::schema::schema::user::dsl::{pwd, user, userid, username};
         let user_uuid = StrChange::to_uuid(id).unwrap();
@@ -103,8 +106,8 @@ impl User {
         }
 
         match updated_user {
-            Ok(o) => return Ok(o),
-            Err(e) => return Err(e.to_string()),
+            Ok(o) => return Ok(Response{data:o, success: true, status: 200}),
+            Err(e) => return Err(Response{status: 400, data:e.to_string(), success: false}),
         }
     }
 
@@ -132,11 +135,12 @@ impl User {
     pub fn add(username_input: &str, pwd: &str) -> Result<Response<User>, Response<String>> {
         let conn = &mut back::establish_connection();
 
-        let already_exist:Option<User> = User::get_user_by_username(username_input);
+        let already_exist: Option<User> = User::get_user_by_username(username_input);
         if already_exist.is_some() {
             return Err(Response {
                 success: false,
                 data: "User already exists. Pick another username.".to_string(),
+                status: 200
             });
         }
 
@@ -152,10 +156,11 @@ impl User {
                 .values(&new_post)
                 .get_result(conn)
                 .expect("Error saving new post: {}"),
+                status: 200
         })
     }
 
-    pub fn read(num_user: i64) -> Vec<User> {
+    pub fn read(num_user: i64) -> Response<Vec<User>> {
         use crate::schema::schema::user::dsl::*;
 
         let connection = &mut back::establish_connection();
@@ -165,6 +170,6 @@ impl User {
             .load::<User>(connection)
             .expect("Error loading posts");
 
-        return results;
+        return Response{data:results, success: true, status:200};
     }
 }

@@ -4,9 +4,5 @@ use serde::{Serialize, Deserialize};
 pub struct Response<T> {
     pub success: bool,
     pub data: T,
+    pub status: u16
 }
-
-// pub struct ResponseWithStatus<T> {
-//     pub status: u16,
-//     pub content: Response<T>
-// }

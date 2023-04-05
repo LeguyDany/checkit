@@ -16,10 +16,10 @@ fn check_user_is_logged_in(token: AuthorizationToken) -> Json<Response<String>> 
 
     match res {
         Ok(o) => {
-            return Json(Response{success: true, data: format!("Success: {}", o.data.user_token.username)});
+            return Json(Response{success: true, data: format!("Success: {}", o.data.user_token.username), status: o.status});
         },
         Err(e) => {
-            return Json(Response{success: false, data: format!("Error: {}", e.data)});
+            return Json(Response{success: false, data: format!("Error: {}", e.data), status: e.status});
         }
     }
 }
