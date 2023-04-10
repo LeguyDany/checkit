@@ -1,15 +1,17 @@
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 
-mod helpers;
-mod controllers;
-mod contracts;
-mod models;
-mod utils;
-mod schema;
 mod configs;
+mod contracts;
+mod controllers;
+mod helpers;
+mod models;
+mod schema;
+mod utils;
 
-use self::contracts::user;
 use self::contracts::auth;
+use self::contracts::template;
+use self::contracts::user;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -17,9 +19,10 @@ fn index() -> &'static str {
 }
 
 #[launch]
-fn rocket() -> _ {
+async fn rocket() -> _ {
     rocket::build()
         .mount("/", routes![index])
         .mount("/users", user::routes())
+        .mount("/template", template::routes())
         .mount("/auth", auth::routes())
 }

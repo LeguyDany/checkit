@@ -1,8 +1,8 @@
+use crate::models::auth::AuthorizationToken;
+use crate::models::user::{UpdatedUser, User};
 use crate::{controllers::user_controller::AddUser, models::response::Response};
 use rocket::serde::json::Json;
 use rocket::Route;
-
-use crate::models::user::{UpdatedUser, User};
 
 #[get("/<name>")]
 fn search_users(name: &str) -> Result<Json<Response<User>>, Json<Response<String>>> {
@@ -47,13 +47,9 @@ fn delete_user(id: &str) -> Json<Response<String>> {
 }
 
 #[patch("/update_user", data = "<data>", format = "application/json")]
-fn update_user(data: Json<UpdatedUser>) -> Result<Json<Response<User>>, Json<Response<String>>> {
-    let execute = User::update(&data.id, &data.updated_value, &data.is_username);
-
-    match execute {
-        Ok(o) => Ok(Json(o)),
-        Err(e) => Err(Json(e)),
-    }
+fn update_user(token: AuthorizationToken, data: Json<UpdatedUser>) -> Json<Response<String>> {
+    let execute = User::update(token.0, &data.is_username, &data.updated_value, &data.pwd);
+    Json(execute)
 }
 
 pub fn routes() -> Vec<Route> {

@@ -7,9 +7,9 @@ use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UpdatedUser {
-    pub id: String,
-    pub updated_value: String,
     pub is_username: bool,
+    pub updated_value: String,
+    pub pwd: String,
 }
 
 #[derive(Queryable, serde::Serialize, Clone)]

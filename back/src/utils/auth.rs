@@ -1,9 +1,11 @@
 use std::env;
 
 use crate::models::user::User;
+use bcrypt::verify;
 use chrono::Utc;
 use dotenvy::dotenv;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
+use uuid::Uuid;
 
 use crate::models::{
     auth::{Auth, UserToken},
@@ -39,6 +41,11 @@ impl<'r> FromRequest<'r> for AuthorizationToken {
 }
 
 impl Auth {
+    pub fn check_pwd_with_userid(user_id:Uuid, pwd: &str) -> bool{
+        let user = User::get_user_by_id(user_id).data;
+        verify(pwd, &user.pwd).unwrap()
+    }
+
     pub fn encode_token(user: User) -> Result<Response<String>, Response<String>> {
         let user_info = UserToken {
             userid: user.userid,

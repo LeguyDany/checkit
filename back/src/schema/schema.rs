@@ -16,9 +16,9 @@ diesel::table! {
     template (templateid) {
         templateid -> Uuid,
         userid -> Nullable<Uuid>,
-        templatename -> Nullable<Varchar>,
-        weekday -> Nullable<Varchar>,
-        creationdate -> Nullable<Timestamp>,
+        templatename -> Varchar,
+        creationdate -> Timestamp,
+        weekdays -> Array<Nullable<Bool>>,
         updatedate -> Nullable<Timestamp>,
     }
 }

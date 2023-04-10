@@ -12,12 +12,12 @@ CREATE TABLE "user" (
   token VARCHAR
 );
 
-CREATE TABLE template (
+CREATE TABLE template ( 
     templateid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    userid UUID,
-    templatename varchar,
-    weekday varchar,
-    creationdate timestamp default now(),
+    userid UUID ,
+    templatename varchar NOT NULL DEFAULT '',
+    creationdate timestamp NOT NULL default now(),
+    weekdays BOOLEAN[] NOT NULL DEFAULT '{false, false, false, false, false, false, false}',
     updatedate timestamp,
     CONSTRAINT fk_userid_template
       FOREIGN KEY(userid) 

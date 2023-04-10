@@ -23,7 +23,6 @@ pub struct AddUser<'a> {
 }
 
 impl User {
-    
     #[allow(dead_code)]
     pub fn get_user_by_id(id: Uuid) -> Response<User> {
         let conn = &mut back::establish_connection();
@@ -35,7 +34,11 @@ impl User {
             .expect("Error loading posts");
 
         let response: User = user_filtered.remove(0);
-        Response { success: true, data: response, status: 200 }
+        Response {
+            success: true,
+            data: response,
+            status: 200,
+        }
     }
 
     pub fn get_user_by_username(inputname: &str) -> Option<User> {
@@ -56,7 +59,11 @@ impl User {
             }
             Err(e) => {
                 println!("{}", status::Custom(Status::BadRequest, e.to_string()).0);
-                return Err(Response{success: false, data: e.to_string(), status: 400});
+                return Err(Response {
+                    success: false,
+                    data: e.to_string(),
+                    status: 400,
+                });
             }
         }
 
@@ -69,46 +76,73 @@ impl User {
                     Ok(Response {
                         success: true,
                         data: format!("{} user deleted.", res.to_string()),
-                        status: 200
+                        status: 200,
                     })
                 } else {
                     Ok(Response {
                         success: false,
                         data: "There isn't any user with that uuid.".to_owned(),
-                        status: 200
+                        status: 200,
                     })
                 }
             }
             Err(e) => {
-                return Err(Response{success: false, data: e.to_string(), status: 400});
+                return Err(Response {
+                    success: false,
+                    data: e.to_string(),
+                    status: 400,
+                });
             }
         }
     }
 
-    pub fn update(id: &str, update_value: &str, is_username: &bool) -> Result<Response<User>, Response<String>> {
-        use crate::helpers::str_helper::StrChange;
+    pub fn update(
+        token: String,
+        is_username: &bool,
+        updated_value: &str,
+        user_pwd: &str,
+    ) -> Response<String> {
         use crate::schema::schema::user::dsl::{pwd, user, userid, username};
-        let user_uuid = StrChange::to_uuid(id).unwrap();
+
+        use crate::models::auth::Auth;
+
+        let decoded_token: Auth;
+
+        match Auth::decode_token(token) {
+            Ok(o) => {
+                decoded_token = o.data;
+            }
+            Err(e) => {
+                return e;
+            }
+        }
+        println!("{}", decoded_token.user_token.username);
+        if !Auth::check_pwd_with_userid(decoded_token.user_token.userid, user_pwd) {
+            return Response {
+                success: false,
+                data: "Wrong password.".to_string(),
+                status: 400,
+            };
+        }
 
         let conn = &mut back::establish_connection();
 
         let updated_user;
 
         if *is_username {
-            updated_user = diesel::update(user.filter(userid.eq(user_uuid)))
-                .set(username.eq(update_value))
-                .get_result::<User>(conn);
+            let _data = diesel::update(user.filter(userid.eq(decoded_token.user_token.userid)))
+                .set(username.eq(updated_value))
+                .execute(conn);
+            updated_user = Auth::login(updated_value, user_pwd)
         } else {
-            let password_hash = hash(update_value.trim_end(), DEFAULT_COST).unwrap();
-            updated_user = diesel::update(user.filter(userid.eq(user_uuid)))
+            let password_hash = hash(updated_value.trim_end(), DEFAULT_COST).unwrap();
+            let _data = diesel::update(user.filter(userid.eq(decoded_token.user_token.userid)))
                 .set(pwd.eq(password_hash))
-                .get_result::<User>(conn);
+                .execute(conn);
+            updated_user = Auth::login(&decoded_token.user_token.username, updated_value)
         }
 
-        match updated_user {
-            Ok(o) => return Ok(Response{data:o, success: true, status: 200}),
-            Err(e) => return Err(Response{status: 400, data:e.to_string(), success: false}),
-        }
+        updated_user
     }
 
     /// Adds a new user to the database.
@@ -140,7 +174,7 @@ impl User {
             return Err(Response {
                 success: false,
                 data: "User already exists. Pick another username.".to_string(),
-                status: 200
+                status: 200,
             });
         }
 
@@ -156,7 +190,7 @@ impl User {
                 .values(&new_post)
                 .get_result(conn)
                 .expect("Error saving new post: {}"),
-                status: 200
+            status: 200,
         })
     }
 
@@ -170,6 +204,10 @@ impl User {
             .load::<User>(connection)
             .expect("Error loading posts");
 
-        return Response{data:results, success: true, status:200};
+        return Response {
+            data: results,
+            success: true,
+            status: 200,
+        };
     }
 }
