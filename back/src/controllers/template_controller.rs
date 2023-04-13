@@ -51,7 +51,7 @@ impl Template {
         });
     }
 
-    pub fn delete(id: &str) -> Result<Response<String>, Response<String>> {
+    pub fn delete(id: &str, token: &str) -> Result<Response<String>, Response<String>> {
         use crate::helpers::str_helper::StrChange;
 
         let input_uuid: Uuid;
@@ -72,6 +72,10 @@ impl Template {
 
         let conn = &mut back::establish_connection();
 
+        match Template::check_user_valid(token, input_uuid) {
+            Ok(_) => {}
+            Err(e) => return Err(e),
+        }
         use crate::schema::schema::template::dsl::{template, templateid};
         match diesel::delete(template.filter(templateid.eq(input_uuid))).execute(conn) {
             Ok(res) => {
@@ -84,7 +88,7 @@ impl Template {
                 } else {
                     Ok(Response {
                         success: false,
-                        data: "There isn't any template with that uuid.".to_owned(),
+                        data: "There isn't any template with that uuid.".to_string(),
                         status: 200,
                     })
                 }
@@ -99,12 +103,17 @@ impl Template {
         }
     }
 
-    pub fn update(updated_template: UpdatedTemplate) -> Response<String> {
+    pub fn update(updated_template: UpdatedTemplate, token: &str) -> Response<String> {
         use crate::schema::schema::template::dsl::{template, templateid, templatename, weekdays};
         let conn = &mut back::establish_connection();
 
         let updated_name = &updated_template.template_name;
         let updated_weekdays = &updated_template.weekdays;
+
+        match Template::check_user_valid(token, updated_template.templateid) {
+            Ok(_) => {}
+            Err(e) => return e,
+        }
 
         let _data = diesel::update(template.filter(templateid.eq(&updated_template.templateid)))
             .set((
@@ -129,14 +138,14 @@ impl Template {
         use crate::schema::schema::template;
         let decoded_token = Auth::decode_token(token.to_string());
 
-        new_template.userid = decoded_token.unwrap().data.user_token.userid;
+        new_template.userid = Some(decoded_token.unwrap().data.user_token.userid);
 
         Ok(Response {
             success: true,
             data: diesel::insert_into(template::table)
                 .values(new_template)
                 .get_result(conn)
-                .expect("Error saving new template: {}"),
+                .expect("An error occured while saving a new template: {}"),
             status: 200,
         })
     }

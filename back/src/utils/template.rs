@@ -1,4 +1,7 @@
+use crate::models::auth::Auth;
+use crate::models::response::Response;
 use crate::models::template::{Template, Weekdays};
+use uuid::Uuid;
 
 impl Template {
     pub fn convert_array_to_weekdays(input_weekdays: Vec<bool>) -> Weekdays {
@@ -13,6 +16,27 @@ impl Template {
         };
 
         weekdays
+    }
+    pub fn check_user_valid(
+        token: &str,
+        current_template_uuid: Uuid,
+    ) -> Result<bool, Response<String>> {
+        let current_template_userid = Template::get_template_by_id(current_template_uuid)
+            .data
+            .userid
+            .unwrap();
+        let decoded_token = Auth::decode_token(token.to_string()).unwrap().data;
+
+        if decoded_token.user_token.userid != current_template_userid {
+            return Err(Response {
+                success: false,
+                data: "Wrong user, please log in with the right account to delete this template."
+                    .to_string(),
+                status: 400,
+            });
+        };
+
+        Ok(true)
     }
 }
 

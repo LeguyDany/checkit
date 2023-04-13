@@ -1,6 +1,6 @@
 use crate::models::auth::AuthorizationToken;
 use crate::models::response::Response;
-use crate::models::template::{AddTemplate, Template};
+use crate::models::template::{AddTemplate, Template, UpdatedTemplate};
 use rocket::serde::json::Json;
 use rocket::Route;
 
@@ -29,8 +29,8 @@ fn add_template(
 }
 
 #[delete("/delete/<id>")]
-fn delete_template(id: &str) -> Json<Response<String>> {
-    let execute = Template::delete(&id);
+fn delete_template(id: &str, token: AuthorizationToken) -> Json<Response<String>> {
+    let execute = Template::delete(&id, &token.0);
 
     match execute {
         Ok(o) => Json(o),
@@ -38,6 +38,28 @@ fn delete_template(id: &str) -> Json<Response<String>> {
     }
 }
 
+#[patch("/update", data = "<data>", format = "application/json")]
+fn update_template(
+    token: AuthorizationToken,
+    data: Json<UpdatedTemplate>,
+) -> Json<Response<String>> {
+    let execute = Template::update(
+        UpdatedTemplate {
+            template_name: data.0.template_name,
+            templateid: data.0.templateid,
+            weekdays: data.0.weekdays,
+        },
+        &token.0,
+    );
+
+    Json(execute)
+}
+
 pub fn routes() -> Vec<Route> {
-    routes![delete_template, add_template, get_account_templates]
+    routes![
+        delete_template,
+        add_template,
+        get_account_templates,
+        update_template
+    ]
 }

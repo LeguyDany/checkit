@@ -17,7 +17,7 @@ pub struct UpdatedTemplate {
 pub struct AddTemplate<'a> {
     pub templatename: &'a str,
     pub weekdays: Vec<bool>,
-    pub userid: Uuid,
+    pub userid: Option<Uuid>,
 }
 
 #[derive(Debug, Deserialize, serde::Serialize, Clone)]
