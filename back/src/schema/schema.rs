@@ -6,8 +6,8 @@ diesel::table! {
         userid -> Nullable<Uuid>,
         templateid -> Nullable<Uuid>,
         content -> Nullable<Varchar>,
-        checked -> Nullable<Bool>,
-        creationdate -> Nullable<Timestamp>,
+        checked -> Bool,
+        creationdate -> Timestamp,
         duetime -> Nullable<Timestamp>,
     }
 }

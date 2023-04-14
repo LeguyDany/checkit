@@ -10,6 +10,7 @@ mod schema;
 mod utils;
 
 use self::contracts::auth;
+use self::contracts::task;
 use self::contracts::template;
 use self::contracts::user;
 
@@ -25,4 +26,5 @@ async fn rocket() -> _ {
         .mount("/users", user::routes())
         .mount("/template", template::routes())
         .mount("/auth", auth::routes())
+        .mount("/task", task::routes())
 }

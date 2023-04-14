@@ -28,10 +28,10 @@ CREATE TABLE task (
     taskid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     userid UUID,
     templateid UUID DEFAULT null,
-    "content" varchar,
-    checked bool,
-    creationdate timestamp default now(),
-    duetime timestamp,
+    "content" VARCHAR, 
+    checked BOOL NOT NULL DEFAULT false,
+    creationdate TIMESTAMP NOT NULL DEFAULT now(),
+    duetime TIMESTAMP,
     CONSTRAINT fk_userid_task
       FOREIGN KEY(userid) 
 	  REFERENCES public.user(userid),
