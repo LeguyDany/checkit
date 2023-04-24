@@ -9,6 +9,38 @@ use rocket::http::Status;
 use rocket::response::status;
 
 impl Template {
+    pub fn get_templates_for_today(
+        token: &str,
+    ) -> Result<Response<Vec<Template>>, Response<String>> {
+        let conn = &mut back::establish_connection();
+        use crate::schema::schema::template::dsl::{template, userid as tuserid, weekdays};
+
+        use chrono::{Datelike, Local};
+        let decoded_token;
+
+        match Auth::decode_token(token.to_string()) {
+            Ok(o) => decoded_token = o.data,
+            Err(e) => return Err(e),
+        }
+
+        let today = Local::now();
+        let today_to_number = today.weekday().number_from_monday() - 1;
+        let results = template
+            .filter(tuserid.eq(decoded_token.user_token.userid))
+            .load::<Template>(conn)
+            .expect("Couldn't find the user's template in the database.");
+        let filtered_results = results
+            .into_iter()
+            .filter(|temp| temp.weekdays.get(today_to_number as usize) == Some(&Some(true)))
+            .collect::<Vec<_>>();
+
+        return Ok(Response {
+            data: filtered_results,
+            success: true,
+            status: 200,
+        });
+    }
+
     pub fn get_template_by_id(id: Uuid) -> Response<Template> {
         let conn = &mut back::establish_connection();
         use crate::schema::schema::template::dsl::template;

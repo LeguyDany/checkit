@@ -17,6 +17,7 @@ impl Template {
 
         weekdays
     }
+
     pub fn check_user_valid(
         token: &str,
         current_template_uuid: Uuid,
@@ -30,8 +31,7 @@ impl Template {
         if decoded_token.user_token.userid != current_template_userid {
             return Err(Response {
                 success: false,
-                data: "Wrong user, please log in with the right account to delete this template."
-                    .to_string(),
+                data: "Wrong user, please log in with the right account to do this.".to_string(),
                 status: 400,
             });
         };

@@ -2,14 +2,14 @@ use crate::models::auth::Auth;
 use crate::models::response::Response;
 use uuid::Uuid;
 
-use crate::models::task::{AddTask, Task, UpdatedTask};
+use crate::models::templating_task::{AddTemplatingTask, TemplatingTask, UpdatedTemplatingTask};
 use diesel::prelude::*;
 
 use rocket::http::Status;
 use rocket::response::status;
 
-impl Task {
-    pub fn get_task_by_id(id: &str) -> Result<Response<Task>, Response<String>> {
+impl TemplatingTask {
+    pub fn get_task_by_id(id: &str) -> Result<Response<TemplatingTask>, Response<String>> {
         use crate::helpers::str_helper::StrChange;
 
         let input_uuid: Uuid;
@@ -29,14 +29,14 @@ impl Task {
         }
 
         let conn = &mut back::establish_connection();
-        use crate::schema::schema::task::dsl::task;
+        use crate::schema::schema::templating_task::dsl::templating_task;
 
-        let mut task_filtered = task
+        let mut task_filtered = templating_task
             .find(input_uuid)
-            .load::<Task>(conn)
+            .load::<TemplatingTask>(conn)
             .expect("Err loading tasks");
 
-        let response: Task = task_filtered.remove(0);
+        let response: TemplatingTask = task_filtered.remove(0);
         Ok(Response {
             success: true,
             data: response,
@@ -45,38 +45,20 @@ impl Task {
     }
 
     pub fn get_tasks_by_templateid(
-        template_input: &str,
+        template_input: Uuid,
         token: &str,
-    ) -> Result<Response<Vec<Task>>, Response<String>> {
-        use crate::helpers::str_helper::StrChange;
-
-        let template_input_uuid: Uuid;
-
-        match StrChange::to_uuid(template_input) {
-            Ok(o) => {
-                template_input_uuid = o;
-            }
-            Err(e) => {
-                println!("{}", status::Custom(Status::BadRequest, e.to_string()).0);
-                return Err(Response {
-                    success: false,
-                    data: e.to_string(),
-                    status: 400,
-                });
-            }
-        }
-
-        match crate::models::template::Template::check_user_valid(token, template_input_uuid) {
+    ) -> Result<Response<Vec<TemplatingTask>>, Response<String>> {
+        match crate::models::template::Template::check_user_valid(token, template_input) {
             Ok(_) => {}
             Err(e) => return Err(e),
         }
 
         let conn = &mut back::establish_connection();
-        use crate::schema::schema::task::dsl::{task, templateid};
+        use crate::schema::schema::templating_task::dsl::{templateid, templating_task};
 
-        let results = task
-            .filter(templateid.eq(template_input_uuid))
-            .load::<Task>(conn)
+        let results = templating_task
+            .filter(templateid.eq(template_input))
+            .load::<TemplatingTask>(conn)
             .expect("Couldn't find the template's tasks in the database.");
 
         return Ok(Response {
@@ -105,7 +87,7 @@ impl Task {
             }
         }
 
-        let template_from_task = Task::get_task_by_id(id).unwrap();
+        let template_from_task = TemplatingTask::get_task_by_id(id).unwrap();
         let conn = &mut back::establish_connection();
 
         match crate::models::template::Template::check_user_valid(
@@ -115,8 +97,8 @@ impl Task {
             Ok(_) => {}
             Err(e) => return Err(e),
         }
-        use crate::schema::schema::task::dsl::{task, taskid};
-        match diesel::delete(task.filter(taskid.eq(input_uuid))).execute(conn) {
+        use crate::schema::schema::templating_task::dsl::{templating_task, temptaskid};
+        match diesel::delete(templating_task.filter(temptaskid.eq(input_uuid))).execute(conn) {
             Ok(res) => {
                 if res.to_string().parse::<i32>().unwrap() > 0 {
                     Ok(Response {
@@ -142,12 +124,14 @@ impl Task {
         }
     }
 
-    pub fn update(updated_task: UpdatedTask, token: &str) -> Response<String> {
-        use crate::schema::schema::task::dsl::{checked, content, task, taskid};
+    pub fn update(updated_task: UpdatedTemplatingTask, token: &str) -> Response<String> {
+        use crate::schema::schema::templating_task::dsl::{
+            content, duetime, templating_task, temptaskid,
+        };
         let conn = &mut back::establish_connection();
 
         let updated_content = &updated_task.content;
-        let updated_checked = &updated_task.checked;
+        let updated_duetime = &updated_task.duetime;
 
         match crate::models::template::Template::check_user_valid(
             token,
@@ -157,8 +141,8 @@ impl Task {
             Err(e) => return e,
         }
 
-        let _data = diesel::update(task.filter(taskid.eq(&updated_task.taskid)))
-            .set((content.eq(updated_content), checked.eq(updated_checked)))
+        let _data = diesel::update(templating_task.filter(temptaskid.eq(&updated_task.temptaskid)))
+            .set((content.eq(updated_content), duetime.eq(updated_duetime)))
             .execute(conn);
 
         Response {
@@ -168,17 +152,20 @@ impl Task {
         }
     }
 
-    pub fn add(token: &str, mut new_task: AddTask) -> Result<Response<Task>, Response<String>> {
+    pub fn add(
+        token: &str,
+        mut new_task: AddTemplatingTask,
+    ) -> Result<Response<TemplatingTask>, Response<String>> {
         let conn = &mut back::establish_connection();
 
-        use crate::schema::schema::task;
+        use crate::schema::schema::templating_task;
         let decoded_token = Auth::decode_token(token.to_string());
 
         new_task.userid = Some(decoded_token.unwrap().data.user_token.userid);
 
         Ok(Response {
             success: true,
-            data: diesel::insert_into(task::table)
+            data: diesel::insert_into(templating_task::table)
                 .values(new_task)
                 .get_result(conn)
                 .expect("An error occured while saving a new template: {}"),

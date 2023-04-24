@@ -1,8 +1,8 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    task (taskid) {
-        taskid -> Uuid,
+    executable_task (exetaskid) {
+        exetaskid -> Uuid,
         userid -> Nullable<Uuid>,
         templateid -> Nullable<Uuid>,
         content -> Nullable<Varchar>,
@@ -24,6 +24,17 @@ diesel::table! {
 }
 
 diesel::table! {
+    templating_task (temptaskid) {
+        temptaskid -> Uuid,
+        userid -> Nullable<Uuid>,
+        templateid -> Nullable<Uuid>,
+        content -> Nullable<Varchar>,
+        creationdate -> Timestamp,
+        duetime -> Nullable<Timestamp>,
+    }
+}
+
+diesel::table! {
     user (userid) {
         userid -> Uuid,
         username -> Varchar,
@@ -35,12 +46,6 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(task -> template (templateid));
-diesel::joinable!(task -> user (userid));
 diesel::joinable!(template -> user (userid));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    task,
-    template,
-    user,
-);
+diesel::allow_tables_to_appear_in_same_query!(executable_task, template, templating_task, user,);
