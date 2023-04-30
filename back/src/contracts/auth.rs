@@ -1,39 +1,34 @@
+use crate::models::auth::AuthorizationToken;
+use crate::models::auth::{Auth, LoginId};
+use crate::models::response::Response;
 use rocket::serde::json::Json;
 use rocket::Route;
-use crate::models::auth::{Auth, LoginId};
-use crate::models::response::{Response};
-use crate::models::auth::{AuthorizationToken};
 
 #[post("/login", data = "<data>", format = "application/json")]
-fn login(data: Json<LoginId>) -> Json<Response<String>> {
+fn login(data: Json<LoginId>) -> Result<Json<Response<String>>, Json<Response<String>>> {
     let res = Auth::login(&data.username, &data.pwd);
-    return Json(res);
+    return Ok(Json(res?));
 }
 
 #[get("/check_logged_in")]
-fn check_user_is_logged_in(token: AuthorizationToken) -> Json<Response<String>> {
-    let res = Auth::check_login(token.0);
+fn check_user_is_logged_in(
+    token: AuthorizationToken,
+) -> Result<Json<Response<String>>, Json<Response<String>>> {
+    let res = Auth::check_login(token.0).map_err(|e| Json(e))?;
 
-    match res {
-        Ok(o) => {
-            return Json(Response{success: true, data: format!("Success: {}", o.data.user_token.username), status: o.status});
-        },
-        Err(e) => {
-            return Json(Response{success: false, data: format!("Error: {}", e.data), status: e.status});
-        }
-    }
+    return Ok(Json(Response {
+        success: true,
+        data: format!("Success: {}", res.data.user_token.username),
+        status: res.status,
+    }));
 }
 
 #[get("/logout")]
-fn logout(token: AuthorizationToken) -> Json<Response<String>> {
-    let res = Auth::logout(token.0);
-    Json(res)
+fn logout(token: AuthorizationToken) -> Result<Json<Response<String>>, Json<Response<String>>> {
+    let res = Auth::logout(token.0).map_err(|e| Json(e))?;
+    Ok(Json(res))
 }
 
 pub fn routes() -> Vec<Route> {
-    routes![
-        login,
-        check_user_is_logged_in,
-        logout
-    ]
+    routes![login, check_user_is_logged_in, logout]
 }

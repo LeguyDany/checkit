@@ -42,7 +42,7 @@ fn delete_template(id: &str, token: AuthorizationToken) -> Json<Response<String>
 fn update_template(
     token: AuthorizationToken,
     data: Json<UpdatedTemplate>,
-) -> Json<Response<String>> {
+) -> Result<Json<Response<String>>, Json<Response<String>>> {
     let execute = Template::update(
         UpdatedTemplate {
             template_name: data.0.template_name,
@@ -50,9 +50,9 @@ fn update_template(
             weekdays: data.0.weekdays,
         },
         &token.0,
-    );
+    )?;
 
-    Json(execute)
+    Ok(Json(execute))
 }
 
 pub fn routes() -> Vec<Route> {

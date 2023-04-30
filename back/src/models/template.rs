@@ -40,17 +40,3 @@ pub struct Template {
     pub weekdays: Vec<Option<bool>>,
     pub updatedate: Option<NaiveDateTime>,
 }
-
-impl Weekdays {
-    pub fn new() -> Weekdays {
-        Weekdays {
-            monday: false,
-            tuesday: false,
-            wednesday: false,
-            thursday: false,
-            friday: false,
-            saturday: false,
-            sunday: false,
-        }
-    }
-}

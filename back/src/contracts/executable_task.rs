@@ -29,11 +29,9 @@ fn add_task(
     }
 }
 
-#[get("/add_exetask_by_temptask")]
-fn add_task_by_temptask(
-    token: AuthorizationToken,
-) -> Result<Json<Response<String>>, Json<Response<String>>> {
-    let execute = ExeTask::add_exetasks_by_temptask(&token.0);
+#[get("/add_exetask_by_temptask/<userid>")]
+fn add_task_by_temptask(userid: &str) -> Result<Json<Response<String>>, Json<Response<String>>> {
+    let execute = ExeTask::add_exetasks_by_temptask(userid);
     match execute {
         Ok(o) => Ok(Json(o)),
         Err(e) => Err(Json(e)),
@@ -51,7 +49,10 @@ fn delete_task(id: &str, token: AuthorizationToken) -> Json<Response<String>> {
 }
 
 #[patch("/update", data = "<data>", format = "application/json")]
-fn update_task(token: AuthorizationToken, data: Json<UpdatedExeTask>) -> Json<Response<String>> {
+fn update_task(
+    token: AuthorizationToken,
+    data: Json<UpdatedExeTask>,
+) -> Result<Json<Response<String>>, Json<Response<String>>> {
     let execute = ExeTask::update(
         UpdatedExeTask {
             content: data.0.content,
@@ -61,9 +62,9 @@ fn update_task(token: AuthorizationToken, data: Json<UpdatedExeTask>) -> Json<Re
             exetaskid: data.0.exetaskid,
         },
         &token.0,
-    );
+    )?;
 
-    Json(execute)
+    return Ok(Json(execute));
 }
 
 pub fn routes() -> Vec<Route> {

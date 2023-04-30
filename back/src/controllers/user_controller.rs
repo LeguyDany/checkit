@@ -8,9 +8,6 @@ use diesel::prelude::*;
 
 use bcrypt::{hash, DEFAULT_COST};
 
-use rocket::http::Status;
-use rocket::response::status;
-
 /// # Arguments
 ///
 /// pub username: &'a str,
@@ -23,8 +20,7 @@ pub struct AddUser<'a> {
 }
 
 impl User {
-    #[allow(dead_code)]
-    pub fn get_user_by_id(id: Uuid) -> Response<User> {
+    pub fn get_user_by_id(id: Uuid) -> Result<Response<User>, Response<String>> {
         let conn = &mut back::establish_connection();
         use crate::schema::schema::user::dsl::user;
 
@@ -34,11 +30,11 @@ impl User {
             .expect("Error loading posts");
 
         let response: User = user_filtered.remove(0);
-        Response {
+        Ok(Response {
             success: true,
             data: response,
             status: 200,
-        }
+        })
     }
 
     pub fn get_user_by_username(inputname: &str) -> Option<User> {
@@ -48,51 +44,47 @@ impl User {
         user.filter(username.eq(inputname)).first::<User>(conn).ok()
     }
 
+    pub fn get_all_users() -> Response<Vec<User>> {
+        let conn = &mut back::establish_connection();
+        use crate::schema::schema::user::dsl::user;
+
+        let all_users = user.load::<User>(conn).unwrap();
+        Response {
+            success: true,
+            data: all_users,
+            status: 200,
+        }
+    }
+
     pub fn delete(id: &str) -> Result<Response<String>, Response<String>> {
         use crate::helpers::str_helper::StrChange;
 
-        let input_uuid: Uuid;
-
-        match StrChange::to_uuid(id) {
-            Ok(o) => {
-                input_uuid = o;
-            }
-            Err(e) => {
-                println!("{}", status::Custom(Status::BadRequest, e.to_string()).0);
-                return Err(Response {
-                    success: false,
-                    data: e.to_string(),
-                    status: 400,
-                });
-            }
-        }
+        let input_uuid = StrChange::to_uuid(id)?;
 
         let conn = &mut back::establish_connection();
 
         use crate::schema::schema::user::dsl::{user, userid};
-        match diesel::delete(user.filter(userid.eq(input_uuid))).execute(conn) {
-            Ok(res) => {
-                if res.to_string().parse::<i32>().unwrap() > 0 {
-                    Ok(Response {
-                        success: true,
-                        data: format!("{} user deleted.", res.to_string()),
-                        status: 200,
-                    })
-                } else {
-                    Ok(Response {
-                        success: false,
-                        data: "There isn't any user with that uuid.".to_owned(),
-                        status: 200,
-                    })
-                }
-            }
-            Err(e) => {
-                return Err(Response {
-                    success: false,
-                    data: e.to_string(),
-                    status: 400,
-                });
-            }
+
+        let res = diesel::delete(user.filter(userid.eq(input_uuid)))
+            .execute(conn)
+            .map_err(|e| Response {
+                success: false,
+                data: e.to_string(),
+                status: 400,
+            })?;
+
+        if res.to_string().parse::<i32>().unwrap() > 0 {
+            Ok(Response {
+                success: true,
+                data: format!("{} user deleted.", res.to_string()),
+                status: 200,
+            })
+        } else {
+            Ok(Response {
+                success: false,
+                data: "There isn't any user with that uuid.".to_owned(),
+                status: 200,
+            })
         }
     }
 
@@ -101,28 +93,19 @@ impl User {
         is_username: &bool,
         updated_value: &str,
         user_pwd: &str,
-    ) -> Response<String> {
+    ) -> Result<Response<String>, Response<String>> {
         use crate::schema::schema::user::dsl::{pwd, user, userid, username};
 
         use crate::models::auth::Auth;
 
-        let decoded_token: Auth;
+        let decoded_token = Auth::decode_token(token)?.data;
 
-        match Auth::decode_token(token) {
-            Ok(o) => {
-                decoded_token = o.data;
-            }
-            Err(e) => {
-                return e;
-            }
-        }
-        println!("{}", decoded_token.user_token.username);
-        if !Auth::check_pwd_with_userid(decoded_token.user_token.userid, user_pwd) {
-            return Response {
+        if !Auth::check_pwd_with_userid(decoded_token.user_token.userid, user_pwd)? {
+            return Ok(Response {
                 success: false,
                 data: "Wrong password.".to_string(),
                 status: 400,
-            };
+            });
         }
 
         let conn = &mut back::establish_connection();
@@ -133,16 +116,16 @@ impl User {
             let _data = diesel::update(user.filter(userid.eq(decoded_token.user_token.userid)))
                 .set(username.eq(updated_value))
                 .execute(conn);
-            updated_user = Auth::login(updated_value, user_pwd)
+            updated_user = Auth::login(updated_value, user_pwd)?
         } else {
             let password_hash = hash(updated_value.trim_end(), DEFAULT_COST).unwrap();
             let _data = diesel::update(user.filter(userid.eq(decoded_token.user_token.userid)))
                 .set(pwd.eq(password_hash))
                 .execute(conn);
-            updated_user = Auth::login(&decoded_token.user_token.username, updated_value)
+            updated_user = Auth::login(&decoded_token.user_token.username, updated_value)?
         }
 
-        updated_user
+        return Ok(updated_user);
     }
 
     /// Adds a new user to the database.

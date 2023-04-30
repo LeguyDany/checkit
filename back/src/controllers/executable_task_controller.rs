@@ -1,39 +1,13 @@
-use crate::models::auth::Auth;
+use crate::helpers::str_helper::StrChange;
 use crate::models::executable_task::{AddExeTask, ExeTask, UpdatedExeTask};
 use crate::models::response::Response;
 use crate::models::template::Template;
 use crate::models::templating_task::TemplatingTask;
 use diesel::prelude::*;
-use uuid::Uuid;
-
-use rocket::http::Status;
-use rocket::response::status;
 
 impl ExeTask {
-    // pub fn get_tasks_for_today(token: &str) {
-    //     use crate::models::template::Template;
-    //
-    //     Template::get_template_by_userid(token);
-    // }
-
     pub fn get_task_by_id(id: &str) -> Result<Response<ExeTask>, Response<String>> {
-        use crate::helpers::str_helper::StrChange;
-
-        let input_uuid: Uuid;
-
-        match StrChange::to_uuid(id) {
-            Ok(o) => {
-                input_uuid = o;
-            }
-            Err(e) => {
-                println!("{}", status::Custom(Status::BadRequest, e.to_string()).0);
-                return Err(Response {
-                    success: false,
-                    data: e.to_string(),
-                    status: 400,
-                });
-            }
-        }
+        let input_uuid = StrChange::to_uuid(id)?;
 
         let conn = &mut back::establish_connection();
         use crate::schema::schema::executable_task::dsl::executable_task;
@@ -51,39 +25,20 @@ impl ExeTask {
                 status: 200,
             });
         }
-        Err(Response {
+        return Err(Response {
             success: false,
             data: "There isn't any executable task with that id.".to_string(),
             status: 404,
-        })
+        });
     }
 
     pub fn get_tasks_by_templateid(
         template_input: &str,
         token: &str,
     ) -> Result<Response<Vec<ExeTask>>, Response<String>> {
-        use crate::helpers::str_helper::StrChange;
+        let template_input_uuid = StrChange::to_uuid(template_input)?;
 
-        let template_input_uuid: Uuid;
-
-        match StrChange::to_uuid(template_input) {
-            Ok(o) => {
-                template_input_uuid = o;
-            }
-            Err(e) => {
-                println!("{}", status::Custom(Status::BadRequest, e.to_string()).0);
-                return Err(Response {
-                    success: false,
-                    data: e.to_string(),
-                    status: 400,
-                });
-            }
-        }
-
-        match crate::models::template::Template::check_user_valid(token, template_input_uuid) {
-            Ok(_) => {}
-            Err(e) => return Err(e),
-        }
+        crate::models::template::Template::check_user_valid(token, template_input_uuid)?;
 
         let conn = &mut back::establish_connection();
         use crate::schema::schema::executable_task::dsl::{executable_task, templateid};
@@ -91,7 +46,11 @@ impl ExeTask {
         let results = executable_task
             .filter(templateid.eq(template_input_uuid))
             .load::<ExeTask>(conn)
-            .expect("Couldn't find the template's tasks in the database.");
+            .map_err(|_| Response {
+                success: false,
+                data: "Couldn't find the template's tasks in the database.".to_string(),
+                status: 404,
+            })?;
 
         return Ok(Response {
             data: results,
@@ -101,70 +60,55 @@ impl ExeTask {
     }
 
     pub fn delete(id: &str, token: &str) -> Result<Response<String>, Response<String>> {
-        use crate::helpers::str_helper::StrChange;
+        let input_uuid = StrChange::to_uuid(id)?;
 
-        let input_uuid: Uuid;
+        let task_from_id = ExeTask::get_task_by_id(id)?;
 
-        match StrChange::to_uuid(id) {
-            Ok(o) => {
-                input_uuid = o;
-            }
-            Err(e) => {
-                println!("{}", status::Custom(Status::BadRequest, e.to_string()).0);
-                return Err(Response {
+        let conn = &mut back::establish_connection();
+
+        crate::models::template::Template::check_user_valid(
+            token,
+            task_from_id.data.templateid.unwrap(),
+        )?;
+
+        use crate::schema::schema::executable_task::dsl::{executable_task, exetaskid};
+
+        let number_of_deleted_executable_task =
+            diesel::delete(executable_task.filter(exetaskid.eq(input_uuid)))
+                .execute(conn)
+                .map_err(|e| Response {
                     success: false,
-                    data: e.to_string(),
-                    status: 400,
-                });
-            }
-        }
+                    data: format!("Error: {}", e.to_string()),
+                    status: 200,
+                })?;
 
-        let task_from_id = ExeTask::get_task_by_id(id);
-
-        match task_from_id {
-            Ok(o) => {
-                let conn = &mut back::establish_connection();
-
-                match crate::models::template::Template::check_user_valid(
-                    token,
-                    o.data.templateid.unwrap(),
-                ) {
-                    Ok(_) => {}
-                    Err(e) => return Err(e),
-                }
-
-                use crate::schema::schema::executable_task::dsl::{executable_task, exetaskid};
-                match diesel::delete(executable_task.filter(exetaskid.eq(input_uuid))).execute(conn)
-                {
-                    Ok(res) => {
-                        if res.to_string().parse::<i32>().unwrap() > 0 {
-                            Ok(Response {
-                                success: true,
-                                data: format!("{} task deleted.", res.to_string()),
-                                status: 200,
-                            })
-                        } else {
-                            Ok(Response {
-                                success: false,
-                                data: "There isn't any task with that uuid.".to_string(),
-                                status: 200,
-                            })
-                        }
-                    }
-                    Err(e) => {
-                        return Err(Response {
-                            success: false,
-                            data: e.to_string(),
-                            status: 400,
-                        });
-                    }
-                }
-            }
-            Err(e) => return Err(e),
+        if number_of_deleted_executable_task
+            .to_string()
+            .parse::<i32>()
+            .unwrap()
+            > 0
+        {
+            Ok(Response {
+                success: true,
+                data: format!(
+                    "{} task deleted.",
+                    number_of_deleted_executable_task.to_string()
+                ),
+                status: 200,
+            })
+        } else {
+            Ok(Response {
+                success: false,
+                data: "There isn't any task with that uuid.".to_string(),
+                status: 200,
+            })
         }
     }
 
-    pub fn update(updated_task: UpdatedExeTask, token: &str) -> Response<String> {
+    pub fn update(
+        updated_task: UpdatedExeTask,
+        token: &str,
+    ) -> Result<Response<String>, Response<String>> {
         use crate::schema::schema::executable_task::dsl::{
             checked, content, duetime, executable_task, exetaskid,
         };
@@ -174,13 +118,10 @@ impl ExeTask {
         let updated_duetime = &updated_task.duetime;
         let updated_checked = &updated_task.checked;
 
-        match crate::models::template::Template::check_user_valid(
+        crate::models::template::Template::check_user_valid(
             token,
             updated_task.templateid.unwrap(),
-        ) {
-            Ok(_) => {}
-            Err(e) => return e,
-        }
+        )?;
 
         let _data = diesel::update(executable_task.filter(exetaskid.eq(&updated_task.exetaskid)))
             .set((
@@ -190,23 +131,23 @@ impl ExeTask {
             ))
             .execute(conn);
 
-        Response {
+        return Ok(Response {
             success: true,
             data: "Template updated".to_string(),
             status: 200,
-        }
+        });
     }
 
     pub fn add(
-        token: &str,
+        userid: &str,
         mut new_task: AddExeTask,
     ) -> Result<Response<ExeTask>, Response<String>> {
         let conn = &mut back::establish_connection();
 
         use crate::schema::schema::executable_task;
-        let decoded_token = Auth::decode_token(token.to_string());
 
-        new_task.userid = Some(decoded_token.unwrap().data.user_token.userid);
+        let userid_to_uuid = crate::helpers::str_helper::StrChange::to_uuid(userid).unwrap();
+        new_task.userid = Some(userid_to_uuid);
 
         Ok(Response {
             success: true,
@@ -218,20 +159,17 @@ impl ExeTask {
         })
     }
 
-    pub fn add_exetasks_by_temptask(token: &str) -> Result<Response<String>, Response<String>> {
-        let templates_for_today = Template::get_templates_for_today(token).unwrap();
+    pub fn add_exetasks_by_temptask(userid: &str) -> Result<Response<String>, Response<String>> {
+        let templates_for_today = Template::get_templates_for_today(userid)?;
 
         for temp in templates_for_today.data {
-            let task_list: Vec<TemplatingTask>;
-
-            match TemplatingTask::get_tasks_by_templateid(temp.templateid, token) {
-                Ok(o) => task_list = o.data,
-                Err(e) => return Err(e),
-            }
+            let task_list: Vec<TemplatingTask> =
+                TemplatingTask::get_tasks_by_templateid(temp.templateid)?.data;
 
             for template_task in task_list {
-                let _data = ExeTask::add(
-                    token.clone(),
+                println!("Template: {:?}", template_task.content);
+                ExeTask::add(
+                    userid,
                     AddExeTask {
                         content: template_task.content,
                         userid: template_task.userid,
@@ -239,13 +177,13 @@ impl ExeTask {
                         checked: false,
                         templateid: template_task.templateid,
                     },
-                );
+                )?;
             }
         }
-        Ok(Response {
+        return Ok(Response {
             success: true,
             data: "Executable tasks added successfully.".to_string(),
             status: 200,
-        })
+        });
     }
 }

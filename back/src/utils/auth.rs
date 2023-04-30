@@ -41,9 +41,9 @@ impl<'r> FromRequest<'r> for AuthorizationToken {
 }
 
 impl Auth {
-    pub fn check_pwd_with_userid(user_id:Uuid, pwd: &str) -> bool{
-        let user = User::get_user_by_id(user_id).data;
-        verify(pwd, &user.pwd).unwrap()
+    pub fn check_pwd_with_userid(user_id: Uuid, pwd: &str) -> Result<bool, Response<String>> {
+        let user = User::get_user_by_id(user_id)?.data;
+        Ok(verify(pwd, &user.pwd).unwrap())
     }
 
     pub fn encode_token(user: User) -> Result<Response<String>, Response<String>> {
@@ -62,75 +62,53 @@ impl Auth {
         };
 
         dotenv().ok();
-        let jwt_secret: String;
-        match env::var("JWT_SECRET") {
-            Ok(o) => jwt_secret = o,
-            Err(_) => {
-                return Err(Response {
-                    success: false,
-                    data: "No secret found.".to_string(),
-                    status: 400
-                })
-            }
-        };
+        let jwt_secret = env::var("JWT_SECRET").map_err(|_| Response {
+            success: false,
+            data: "No secret found.".to_string(),
+            status: 400,
+        })?;
 
         let json_encode = jsonwebtoken::encode(
             &Header::default(),
             &payload,
             &EncodingKey::from_secret(jwt_secret.as_bytes()),
-        );
+        )
+        .map_err(|e| Response {
+            success: false,
+            data: format!("An error has occured: {}", e.to_string()),
+            status: 400 as u16,
+        })?;
 
-        match json_encode {
-            Ok(o) => {
-                // Save token in database
-                return Ok(Response {
-                    success: true,
-                    data: o.to_string(),
-                    status: 200
-                });
-            }
-            Err(e) => {
-                return Err(Response {
-                    success: false,
-                    data: format!("An error has occured: {}", e.to_string()),
-                    status: 400 as u16
-                })
-            }
-        }
+        return Ok(Response {
+            success: true,
+            data: json_encode.to_string(),
+            status: 200,
+        });
     }
 
     pub fn decode_token(token: String) -> Result<Response<Auth>, Response<String>> {
-
         dotenv().ok();
-        let jwt_secret: String;
-        match env::var("JWT_SECRET") {
-            Ok(o) => jwt_secret = o,
-            Err(_) => {
-                return Err(Response {
-                    success: false,
-                    data: "No secret found.".to_string(),
-                    status: 400
-                })
-            }
-        };
+        let jwt_secret = env::var("JWT_SECRET").map_err(|_| Response {
+            success: false,
+            data: "No secret found.".to_string(),
+            status: 400,
+        })?;
 
         let json_decode = jsonwebtoken::decode::<Auth>(
             &token,
             &DecodingKey::from_secret(jwt_secret.as_bytes()),
             &Validation::default(),
-        );
+        )
+        .map_err(|e| Response {
+            success: false,
+            data: format!("An error has occured: {}", e.to_string()),
+            status: 400,
+        })?;
 
-        match json_decode {
-            Ok(o) => Ok(Response {
-                success: true,
-                data: o.claims,
-                status: 200
-            }),
-            Err(e) => Err(Response {
-                success: false,
-                data: format!("An error has occured: {}", e),
-                status: 400
-            }),
-        }
+        return Ok(Response {
+            success: true,
+            data: json_decode.claims,
+            status: 200,
+        });
     }
 }

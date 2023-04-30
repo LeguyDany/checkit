@@ -4,29 +4,20 @@ use crate::models::template::{Template, Weekdays};
 use uuid::Uuid;
 
 impl Template {
-    pub fn convert_array_to_weekdays(input_weekdays: Vec<bool>) -> Weekdays {
-        let weekdays = Weekdays {
-            monday: input_weekdays[0],
-            tuesday: input_weekdays[1],
-            wednesday: input_weekdays[2],
-            thursday: input_weekdays[3],
-            friday: input_weekdays[4],
-            saturday: input_weekdays[5],
-            sunday: input_weekdays[6],
-        };
-
-        weekdays
-    }
-
     pub fn check_user_valid(
         token: &str,
         current_template_uuid: Uuid,
     ) -> Result<bool, Response<String>> {
-        let current_template_userid = Template::get_template_by_id(current_template_uuid)
+        let current_template_userid = Template::get_template_by_id(current_template_uuid)?
             .data
             .userid
-            .unwrap();
-        let decoded_token = Auth::decode_token(token.to_string()).unwrap().data;
+            .ok_or_else(|| Response {
+                success: false,
+                data: "No template associated with the current user was found.".to_string(),
+                status: 404,
+            })?;
+
+        let decoded_token = Auth::decode_token(token.to_string())?.data;
 
         if decoded_token.user_token.userid != current_template_userid {
             return Err(Response {
@@ -36,7 +27,7 @@ impl Template {
             });
         };
 
-        Ok(true)
+        return Ok(true);
     }
 }
 

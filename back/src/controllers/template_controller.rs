@@ -5,30 +5,23 @@ use uuid::Uuid;
 use crate::models::template::{AddTemplate, Template, UpdatedTemplate};
 use diesel::prelude::*;
 
-use rocket::http::Status;
-use rocket::response::status;
-
 impl Template {
     pub fn get_templates_for_today(
-        token: &str,
+        userid: &str,
     ) -> Result<Response<Vec<Template>>, Response<String>> {
         let conn = &mut back::establish_connection();
-        use crate::schema::schema::template::dsl::{template, userid as tuserid, weekdays};
+        use crate::schema::schema::template::dsl::{template, userid as tuserid};
 
         use chrono::{Datelike, Local};
-        let decoded_token;
-
-        match Auth::decode_token(token.to_string()) {
-            Ok(o) => decoded_token = o.data,
-            Err(e) => return Err(e),
-        }
+        let userid_to_uuid = crate::helpers::str_helper::StrChange::to_uuid(userid)?;
 
         let today = Local::now();
         let today_to_number = today.weekday().number_from_monday() - 1;
         let results = template
-            .filter(tuserid.eq(decoded_token.user_token.userid))
+            .filter(tuserid.eq(userid_to_uuid))
             .load::<Template>(conn)
             .expect("Couldn't find the user's template in the database.");
+
         let filtered_results = results
             .into_iter()
             .filter(|temp| temp.weekdays.get(today_to_number as usize) == Some(&Some(true)))
@@ -41,7 +34,7 @@ impl Template {
         });
     }
 
-    pub fn get_template_by_id(id: Uuid) -> Response<Template> {
+    pub fn get_template_by_id(id: Uuid) -> Result<Response<Template>, Response<String>> {
         let conn = &mut back::establish_connection();
         use crate::schema::schema::template::dsl::template;
 
@@ -50,12 +43,19 @@ impl Template {
             .load::<Template>(conn)
             .expect("Err loading posts");
 
+        if template_filtered.len() == 0 {
+            return Err(Response {
+                success: false,
+                data: "Template was not found.".to_string(),
+                status: 404,
+            });
+        }
         let response: Template = template_filtered.remove(0);
-        Response {
+        Ok(Response {
             success: true,
             data: response,
             status: 200,
-        }
+        })
     }
 
     pub fn get_template_by_userid(
@@ -64,12 +64,7 @@ impl Template {
         let conn = &mut back::establish_connection();
         use crate::schema::schema::template::dsl::{template, userid as tuserid};
 
-        let decoded_token;
-
-        match Auth::decode_token(token.to_string()) {
-            Ok(o) => decoded_token = o.data,
-            Err(e) => return Err(e),
-        }
+        let decoded_token = Auth::decode_token(token.to_string())?.data;
 
         let results = template
             .filter(tuserid.eq(decoded_token.user_token.userid))
@@ -86,66 +81,56 @@ impl Template {
     pub fn delete(id: &str, token: &str) -> Result<Response<String>, Response<String>> {
         use crate::helpers::str_helper::StrChange;
 
-        let input_uuid: Uuid;
-
-        match StrChange::to_uuid(id) {
-            Ok(o) => {
-                input_uuid = o;
-            }
-            Err(e) => {
-                println!("{}", status::Custom(Status::BadRequest, e.to_string()).0);
-                return Err(Response {
-                    success: false,
-                    data: e.to_string(),
-                    status: 400,
-                });
-            }
-        }
+        let input_uuid = StrChange::to_uuid(id)?;
 
         let conn = &mut back::establish_connection();
+        Template::check_user_valid(token, input_uuid)?;
 
-        match Template::check_user_valid(token, input_uuid) {
-            Ok(_) => {}
-            Err(e) => return Err(e),
-        }
         use crate::schema::schema::template::dsl::{template, templateid};
-        match diesel::delete(template.filter(templateid.eq(input_uuid))).execute(conn) {
-            Ok(res) => {
-                if res.to_string().parse::<i32>().unwrap() > 0 {
-                    Ok(Response {
-                        success: true,
-                        data: format!("{} template deleted.", res.to_string()),
-                        status: 200,
-                    })
-                } else {
-                    Ok(Response {
-                        success: false,
-                        data: "There isn't any template with that uuid.".to_string(),
-                        status: 200,
-                    })
-                }
-            }
-            Err(e) => {
-                return Err(Response {
+
+        let number_of_deleted_templates =
+            diesel::delete(template.filter(templateid.eq(input_uuid)))
+                .execute(conn)
+                .map_err(|e| Response {
                     success: false,
                     data: e.to_string(),
                     status: 400,
-                });
-            }
+                })?;
+
+        if number_of_deleted_templates
+            .to_string()
+            .parse::<i32>()
+            .unwrap()
+            > 0
+        {
+            Ok(Response {
+                success: true,
+                data: format!(
+                    "{} template deleted.",
+                    number_of_deleted_templates.to_string()
+                ),
+                status: 200,
+            })
+        } else {
+            Ok(Response {
+                success: false,
+                data: "There isn't any template with that uuid.".to_string(),
+                status: 200,
+            })
         }
     }
 
-    pub fn update(updated_template: UpdatedTemplate, token: &str) -> Response<String> {
+    pub fn update(
+        updated_template: UpdatedTemplate,
+        token: &str,
+    ) -> Result<Response<String>, Response<String>> {
         use crate::schema::schema::template::dsl::{template, templateid, templatename, weekdays};
         let conn = &mut back::establish_connection();
 
         let updated_name = &updated_template.template_name;
         let updated_weekdays = &updated_template.weekdays;
 
-        match Template::check_user_valid(token, updated_template.templateid) {
-            Ok(_) => {}
-            Err(e) => return e,
-        }
+        Template::check_user_valid(token, updated_template.templateid)?;
 
         let _data = diesel::update(template.filter(templateid.eq(&updated_template.templateid)))
             .set((
@@ -154,11 +139,11 @@ impl Template {
             ))
             .execute(conn);
 
-        Response {
+        Ok(Response {
             success: true,
             data: "Template updated".to_string(),
             status: 200,
-        }
+        })
     }
 
     pub fn add(
@@ -168,9 +153,9 @@ impl Template {
         let conn = &mut back::establish_connection();
 
         use crate::schema::schema::template;
-        let decoded_token = Auth::decode_token(token.to_string());
+        let decoded_token = Auth::decode_token(token.to_string())?.data;
 
-        new_template.userid = Some(decoded_token.unwrap().data.user_token.userid);
+        new_template.userid = Some(decoded_token.user_token.userid);
 
         Ok(Response {
             success: true,
