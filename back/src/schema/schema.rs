@@ -48,4 +48,9 @@ diesel::table! {
 
 diesel::joinable!(template -> user (userid));
 
-diesel::allow_tables_to_appear_in_same_query!(executable_task, template, templating_task, user,);
+diesel::allow_tables_to_appear_in_same_query!(
+    executable_task,
+    template,
+    templating_task,
+    user,
+);

@@ -24,8 +24,23 @@ CREATE TABLE template (
       REFERENCES public.user(userid)
 );
 
-CREATE TABLE task (
-    taskid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE templating_task (
+    temptaskid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    userid UUID,
+    templateid UUID DEFAULT null,
+    "content" VARCHAR, 
+    creationdate TIMESTAMP NOT NULL DEFAULT now(),
+    duetime TIMESTAMP,
+    CONSTRAINT fk_userid_task
+      FOREIGN KEY(userid) 
+	  REFERENCES public.user(userid),
+    CONSTRAINT fk_templateid_task
+      FOREIGN KEY(templateid) 
+	  REFERENCES public."template"(templateid)
+);
+
+CREATE TABLE executable_task (
+    exetaskid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     userid UUID,
     templateid UUID DEFAULT null,
     "content" VARCHAR, 
