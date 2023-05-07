@@ -1,4 +1,7 @@
 import 'package:checkit/pages/login.dart';
+import 'package:checkit/pages/register.dart';
+import 'package:checkit/router.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,13 +14,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Checkit',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        // fontFamily: 'IBM Plex Sans Regular',
-      ),
-      home: const Login(),
+      return MaterialApp.router(
+        routerConfig: router,
+        title: 'Checkit',
+        theme: ThemeData(fontFamily: 'IBMPlexSans'),
+        debugShowCheckedModeBanner: false,
     );
   }
 }
