@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Color styles
 const black = Color(0xff000000);
@@ -39,3 +40,6 @@ final shadow0 = BoxShadow(
   blurRadius: 10,
   offset: const Offset(0, 5), // changes position of shadow
 );
+
+// Local storage
+const storage = FlutterSecureStorage();

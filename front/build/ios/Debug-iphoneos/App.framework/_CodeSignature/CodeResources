@@ -8,9 +8,13 @@
 		<data>
 		85iaADE5tc/NukRC+KGdiZaZ0ZA=
 		</data>
+		<key>flutter_assets/.env</key>
+		<data>
+		Pvh8mVllG0cJRx6rXciSj5MsyZw=
+		</data>
 		<key>flutter_assets/AssetManifest.json</key>
 		<data>
-		dyPNfO1dirtGZ/Orj3dcqTWrqso=
+		qSiIvgPasjwNbgr658H3AanLkWM=
 		</data>
 		<key>flutter_assets/FontManifest.json</key>
 		<data>
@@ -18,7 +22,7 @@
 		</data>
 		<key>flutter_assets/NOTICES.Z</key>
 		<data>
-		PlW7S4MtL7TtQkoRb3Ujt3CuzuE=
+		N5xkGkVLp56ZwKkdRe18lZvU2xA=
 		</data>
 		<key>flutter_assets/assets/fonts/IBM_Plex_Sans/IBMPlexSans-Bold.ttf</key>
 		<data>
@@ -44,9 +48,25 @@
 		<data>
 		y3arT6OGwIz/m+DhBQuL5ql4zTs=
 		</data>
+		<key>flutter_assets/assets/images/.DS_Store</key>
+		<data>
+		YRXwmz+xyqaoda/8/BkMt247tPs=
+		</data>
 		<key>flutter_assets/assets/images/MAN_WITH_TASK%20LIST.json</key>
 		<data>
-		IXuv/hN5px4Gtva603q7xNepMPo=
+		blI1kI5ddpuXRDfpaPpNZ8PRfTI=
+		</data>
+		<key>flutter_assets/assets/images/RED_LOADER.json</key>
+		<data>
+		V8MSzfwTEMX6Fkil2tPjHAHxDYM=
+		</data>
+		<key>flutter_assets/assets/images/REGISTER.json</key>
+		<data>
+		e+OaH5Z2HNjhtTvCjA4FIl99gfM=
+		</data>
+		<key>flutter_assets/assets/images/WHITE_LOADER.json</key>
+		<data>
+		VW7r5ect2fRzvEg8cZarC0fhZc4=
 		</data>
 		<key>flutter_assets/assets/images/dotted_pattern.svg</key>
 		<data>
@@ -62,7 +82,7 @@
 		</data>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<data>
-		I8etIaFchphRuE4FL6q/8fR0nTQ=
+		+tLOwX6meWOQOrax6vAmuxLRU2I=
 		</data>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
@@ -79,11 +99,18 @@
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>flutter_assets/.env</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			300BDYd8gKVGX7Hlt0kpCuxs+zNej2+Pe5G638gagZk=
+			</data>
+		</dict>
 		<key>flutter_assets/AssetManifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			VE2UVS7erOreW+1eX4rkNgMaQSgnAs60ywwSDCL51o8=
+			rRrE2NI57N73H3l4iHgTzlpZtTmpL7ZyfD6N2+CRm9A=
 			</data>
 		</dict>
 		<key>flutter_assets/FontManifest.json</key>
@@ -97,7 +124,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			HFXgG5olrcAIi8xP6yDEcVvXTlwfuHIWOjpde7wFpQ8=
+			dAH1uUhWG7OW2ePMA7h4ZgKuZqHSs1LklM7ot2SrU20=
 			</data>
 		</dict>
 		<key>flutter_assets/assets/fonts/IBM_Plex_Sans/IBMPlexSans-Bold.ttf</key>
@@ -146,7 +173,28 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			mvXzLKBJbMiebhmJypI24bjEz3gs/EBjQOBIgTne+xc=
+			/OgH+nHK7OqE/sbV0wbpo/H++DptZgIinCrxNXp9Htg=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/images/RED_LOADER.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			s7r6vI0s1kvyUcTNjwUNJ8bLcTMLczzcmW64yiOSrQY=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/images/REGISTER.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			c8brCc2X2juk+LKxoMmJSDZuLuagN719kulvHgv5LCc=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/images/WHITE_LOADER.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZfFEU9etOURsA3ZiO/mA5YkZ9/VNX1z8VLBKti9FOdo=
 			</data>
 		</dict>
 		<key>flutter_assets/assets/images/dotted_pattern.svg</key>
@@ -174,7 +222,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			pz09PSysfIAXo10QW2MNbecD7j58hOLwcuP1ydaXiLo=
+			ZRG9qInOhy4cJZEHQH9RGWNRMotPjeeSs3L2iH7lVoU=
 			</data>
 		</dict>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
