@@ -41,5 +41,15 @@ final shadow0 = BoxShadow(
   offset: const Offset(0, 5), // changes position of shadow
 );
 
+// Global page index
+List<String> pagesList = [
+  '/tasks',
+  '/templates',
+  '/add',
+  '/settings',
+  '/login',
+  '/register'
+];
+
 // Local storage
 const storage = FlutterSecureStorage();

@@ -21,7 +21,9 @@ class ApiRequests {
 
   Future<Response> getRequest(String route) async {
     var url = Uri.http('$apiAddress:$apiPort', route);
-    var response = await http.get(url);
+    var response = await http.get(url, headers: {
+      'Authorization': 'Bearer ${header["Authorization"]}'
+    });
     final Map<String, dynamic> itemJson = jsonDecode(response.body);
     final castedResponse = Response.fromJson(itemJson);
 
