@@ -1,20 +1,15 @@
-import 'dart:async';
-
 import 'package:checkit/config/globals.dart';
 import 'package:checkit/pages/components/general/buttom_nav_bar.dart';
 import 'package:checkit/pages/components/general/header.dart';
-import 'package:checkit/pages/components/general/title.dart';
 import 'package:checkit/pages/home.dart';
 import 'package:checkit/pages/login.dart';
 import 'package:checkit/pages/register.dart';
 import 'package:checkit/pages/settings.dart';
+import 'package:checkit/utils/appbar_title.dart';
 import 'package:checkit/utils/page_transition.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
-
-StreamController<String> _pageTitleStreamController = StreamController<
-    String>();
 final GoRouter router = GoRouter(
   initialLocation: '/tasks',
   routes: <RouteBase>[
@@ -23,15 +18,12 @@ final GoRouter router = GoRouter(
         return Scaffold(
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(75.0),
-            child: StreamBuilder<String>(
-            stream: _pageTitleStreamController.stream,
-            initialData: 'Tasks',
-            builder: (context, snapshot) {
-              return Header(title: snapshot.data!);
-            },
-          ),),
-        body: child,
-        bottomNavigationBar: const BottomNavBar(),
+            child: Header(
+              title: getAppBarTitle(state.location),
+            ),
+          ),
+          body: child,
+          bottomNavigationBar: const BottomNavBar(),
         );
       },
       routes: [

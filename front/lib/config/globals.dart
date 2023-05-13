@@ -40,6 +40,11 @@ final shadow0 = BoxShadow(
   blurRadius: 10,
   offset: const Offset(0, 5), // changes position of shadow
 );
+final shadow1 = BoxShadow(
+  color: Colors.black.withOpacity(0.04),
+  blurRadius: 10,
+  offset: const Offset(0, -5), // changes position of shadow
+);
 
 // Global page index
 List<String> pagesList = [
