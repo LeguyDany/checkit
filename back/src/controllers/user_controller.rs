@@ -3,6 +3,7 @@ use diesel::Insertable;
 use serde::Deserialize;
 use uuid::Uuid;
 
+use crate::models::auth::Auth;
 use crate::models::user::User;
 use diesel::prelude::*;
 
@@ -35,6 +36,30 @@ impl User {
             data: response,
             status: 200,
         })
+    }
+
+    pub fn get_current_user(token: String) -> Result<Response<User>, Response<String>> {
+        let decoded_token = Auth::decode_token(token)?.data;
+
+        let conn = &mut back::establish_connection();
+        use crate::schema::schema::user::dsl::{user, userid};
+
+        let res = user
+            .filter(userid.eq(decoded_token.user_token.userid))
+            .first::<User>(conn)
+            .ok()
+            .ok_or_else(|| Response {
+                success: false,
+                data: "User does not exist or an issue occured while looking for the user."
+                    .to_string(),
+                status: 404,
+            })?;
+
+        return Ok(Response {
+            success: true,
+            data: res,
+            status: 200,
+        });
     }
 
     pub fn get_user_by_username(inputname: &str) -> Option<User> {
@@ -83,7 +108,7 @@ impl User {
             Ok(Response {
                 success: false,
                 data: "There isn't any user with that uuid.".to_owned(),
-                status: 200,
+                status: 404,
             })
         }
     }
@@ -95,8 +120,6 @@ impl User {
         user_pwd: &str,
     ) -> Result<Response<String>, Response<String>> {
         use crate::schema::schema::user::dsl::{pwd, user, userid, username};
-
-        use crate::models::auth::Auth;
 
         let decoded_token = Auth::decode_token(token)?.data;
 
@@ -150,6 +173,28 @@ impl User {
     ///  let post = User::add(&username, &pwd);
     /// ```
     pub fn add(username_input: &str, pwd: &str) -> Result<Response<User>, Response<String>> {
+        if username_input.len() < 4 {
+            return Err(Response {
+                success: false,
+                data: "Username too short, please enter at least 4 characters".to_string(),
+                status: 400,
+            });
+        }
+        if username_input.len() > 20 {
+            return Err(Response {
+                success: false,
+                data: "Username too long, please enter at most 20 characters".to_string(),
+                status: 400,
+            });
+        }
+        if pwd.len() < 4 {
+            return Err(Response {
+                success: false,
+                data: "Password too short, please enter at least 4 characters".to_string(),
+                status: 400,
+            });
+        }
+
         let conn = &mut back::establish_connection();
 
         let already_exist: Option<User> = User::get_user_by_username(username_input);

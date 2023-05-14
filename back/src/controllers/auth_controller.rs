@@ -4,7 +4,6 @@ use crate::models::user::User;
 use bcrypt::verify;
 use diesel::prelude::*;
 
-// Source : https://github.com/SakaDream/rocket-rest-api-with-jwt/blob/master/src/jwt.rs
 impl Auth {
     pub fn login(
         input_username: &str,
@@ -13,7 +12,7 @@ impl Auth {
         let user_from_query: User =
             User::get_user_by_username(input_username).ok_or_else(|| Response {
                 success: false,
-                data: "User input invalid, the user doesn't exist in the database.".to_string(),
+                data: "User input invalid, the user doesn't exist.".to_string(),
                 status: 400,
             })?;
 
@@ -64,8 +63,7 @@ impl Auth {
         }
         return Err(Response {
             success: false,
-            data: "You are trying to login with a non-valid token. Please, log in again."
-                .to_string(),
+            data: "Your account session is no longer valid. Please, log in again.".to_string(),
             status: 400,
         });
     }
