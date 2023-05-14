@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../controller/response.dart';
-import '../../utils/loading.dart';
+import '../../../controller/response.dart';
+import '../../../utils/loading.dart';
 
 Future<bool> notifySnackbar(BuildContext context, Future<Response> request,
-    String caseSuccess, String caseFail, Function() onDismissed) async {
+    String caseSuccess, String caseFail, Function() onDismissed, [int? duration]) async {
   final Future<Response> res = request;
-  late bool isSuccess;
+  bool isSuccess = false;
 
   ScaffoldMessenger.of(context)
       .showSnackBar(
         SnackBar(
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: duration ?? 2),
           content: FutureBuilder<Response>(
               future: res,
               builder: (context, snapshot) {

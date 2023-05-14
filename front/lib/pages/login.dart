@@ -4,7 +4,7 @@ import 'package:checkit/pages/components/general/CTA0.dart';
 import 'package:checkit/pages/components/general/CTA1.dart';
 import 'package:checkit/pages/components/general/buttom_nav_bar.dart';
 import 'package:checkit/pages/components/general/input_text.dart';
-import 'package:checkit/pages/components/log_reg_snackbar.dart';
+import 'package:checkit/pages/components/snackbars/log_reg_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'components/general/header.dart';
