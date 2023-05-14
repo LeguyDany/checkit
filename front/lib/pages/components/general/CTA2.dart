@@ -2,8 +2,10 @@ import 'package:checkit/config/globals.dart';
 import 'package:flutter/material.dart';
 
 class CTA2 extends StatelessWidget {
-  const CTA2({Key? key, required this.content, required this.onPress, required this.isDisabled})
+  const CTA2({Key? key, required this.content, required this.onPress, required this.isDisabled, this.marginTop, this.marginBottom})
       : super(key: key);
+  final double? marginTop;
+  final double? marginBottom;
   final String content;
   final VoidCallback onPress;
   final bool isDisabled;
@@ -11,7 +13,7 @@ class CTA2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 30, bottom: 10),
+      margin: EdgeInsets.only(top: marginTop ?? 30, bottom: marginBottom ?? 10),
       child: Stack(children: [
         OutlinedButton(
           onPressed: isDisabled ? null : onPress,

@@ -19,19 +19,20 @@ const red2 = Color(0xfff07585);
 const red3 = Color(0xfff7a1ac);
 
 // Font styles
-TextStyle getTextStyle(String type, Color color) {
+TextStyle getTextStyle(String type, Color color, [double? lineHeight]) {
+  final height = lineHeight ?? 0;
   switch (type) {
     case "h1":
-      return TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: color);
+      return TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: color, height: height);
     case "h2":
-      return TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: color);
+      return TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: color, height: height);
     case "h3":
-      return TextStyle(fontSize: 24, fontWeight: FontWeight.w500, color: color);
+      return TextStyle(fontSize: 24, fontWeight: FontWeight.w500, color: color, height: height);
     case "h4":
-      return TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: color);
+      return TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: color, height: height);
   }
 
-  return TextStyle(fontSize: 20, fontWeight: FontWeight.w400, color: color);
+  return TextStyle(fontSize: 20, fontWeight: FontWeight.w400, color: color, height: height);
 }
 
 // Shadows styles

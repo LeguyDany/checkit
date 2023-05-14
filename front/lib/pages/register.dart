@@ -50,29 +50,40 @@ class _RegisterState extends State<Register> {
                   placeholder: "Enter your password",
                   targetVariable: password,
                   obscure: true),
-              Row(children: [
-                CTA2(content: "Back", onPress: () => context.pop(), isDisabled: false),
-                const SizedBox(width: 20,),
-                CTA0(
-                    isDisabled: _buttonIsDisabled,
-                    content: "Register",
-                    onPress: () {
-                      setState(() {
-                        _buttonIsDisabled = true;
-                      });
-                      notifySnackbar(
+              Row(
+                children: [
+                  CTA2(
+                      content: "Back",
+                      onPress: () => context.pop(),
+                      isDisabled: false),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  CTA0(
+                      isDisabled: _buttonIsDisabled,
+                      content: "Register",
+                      onPress: () {
+                        setState(() {
+                          _buttonIsDisabled = true;
+                        });
+                        notifySnackbar(
                           context,
                           auth.register(username.text, password.text),
                           'Registration succeeded',
-                          'Registration failed');
+                          'Registration failed',
+                          () {
+                            context.push("/settings");
+                          },
+                        );
 
-                      Timer(const Duration(seconds: 2), () {
-                        setState(() {
-                          _buttonIsDisabled = false;
+                        Timer(const Duration(seconds: 2), () {
+                          setState(() {
+                            _buttonIsDisabled = false;
+                          });
                         });
-                      });
-                    }),
-              ],),
+                      }),
+                ],
+              ),
               Transform.translate(
                 offset: const Offset(0, -10),
                 child: Center(

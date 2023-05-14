@@ -1,4 +1,3 @@
-import 'package:checkit/config/globals.dart';
 import 'package:checkit/pages/components/general/buttom_nav_bar.dart';
 import 'package:checkit/pages/components/general/header.dart';
 import 'package:checkit/pages/home.dart';
