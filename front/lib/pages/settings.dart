@@ -3,9 +3,10 @@ import 'package:checkit/controller/auth.dart';
 import 'package:checkit/controller/user.dart';
 import 'package:checkit/pages/components/general/CTA1.dart';
 import 'package:checkit/pages/components/general/CTA2.dart';
-import 'package:checkit/pages/components/general/header.dart';
 import 'package:checkit/pages/components/general/input_text.dart';
 import 'package:checkit/pages/components/general/title.dart';
+import 'package:checkit/pages/components/modal/change_password.dart';
+import 'package:checkit/pages/components/modal/change_username.dart';
 import 'package:checkit/pages/login.dart';
 import 'package:checkit/utils/loading.dart';
 import 'package:flutter/material.dart';
@@ -40,8 +41,8 @@ class _SettingsState extends State<Settings> {
         }
 
         return FutureBuilder(
-          future: user.getCurrentUser("mimigato"),
-          builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
+          future: user.getCurrentUser(),
+          builder: (context, AsyncSnapshot<Response> snapshot) {
             if (!snapshot.hasData) {
               return const RedLoader();
             }
@@ -64,7 +65,7 @@ class _SettingsState extends State<Settings> {
                         style: getTextStyle("h4", dark1),
                         children: [
                           TextSpan(
-                              text: userInfo!["userid"],
+                              text: userInfo?.data["userid"],
                               style: getTextStyle("regular", dark1))
                         ])),
                     Text.rich(TextSpan(
@@ -72,7 +73,7 @@ class _SettingsState extends State<Settings> {
                         style: getTextStyle("h4", dark1),
                         children: [
                           TextSpan(
-                              text: userInfo["username"],
+                              text: userInfo?.data["username"],
                               style: getTextStyle("regular", dark1))
                         ])),
                     const SizedBox(
@@ -85,12 +86,12 @@ class _SettingsState extends State<Settings> {
                     CTA1(
                         content: "Change username",
                         onPress: () {
-                          print("TODO");
+                          modalChangeUsername(context);
                         }),
                     CTA1(
                         content: "Reset password",
                         onPress: () {
-                          print("TODO");
+                          modalResetPassword(context);
                         }),
                     const SizedBox(
                       height: 20,

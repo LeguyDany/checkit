@@ -8,6 +8,18 @@ class ApiRequests {
   final String apiPort = dotenv.env['API_PORT']!;
   late Map<String, dynamic> header;
 
+  Future<Response> patchRequest(String route, dynamic body) async {
+    var url = Uri.http('$apiAddress:$apiPort', route);
+    var response = await http.patch(url, body: body, headers: <String, String>{
+      'Authorization': 'Bearer ${header["Authorization"]}',
+      'Content-Type': 'application/json; charset=UTF-8',
+    });
+    final Map<String, dynamic> itemJson = jsonDecode(response.body);
+    final castedResponse = Response.fromJson(itemJson);
+
+    return castedResponse;
+  }
+
   Future<Response> postRequest(String route, dynamic body) async {
     var url = Uri.http('$apiAddress:$apiPort', route);
     var response = await http.post(url, body: body, headers: <String, String>{
@@ -21,9 +33,8 @@ class ApiRequests {
 
   Future<Response> getRequest(String route) async {
     var url = Uri.http('$apiAddress:$apiPort', route);
-    var response = await http.get(url, headers: {
-      'Authorization': 'Bearer ${header["Authorization"]}'
-    });
+    var response = await http.get(url,
+        headers: {'Authorization': 'Bearer ${header["Authorization"]}'});
     final Map<String, dynamic> itemJson = jsonDecode(response.body);
     final castedResponse = Response.fromJson(itemJson);
 

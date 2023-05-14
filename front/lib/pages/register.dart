@@ -9,7 +9,7 @@ import 'components/general/CTA2.dart';
 import 'components/general/header.dart';
 import 'components/general/title.dart';
 import 'package:lottie/lottie.dart';
-import 'components/log_reg_snackbar.dart';
+import 'components/snackbars/log_reg_snackbar.dart';
 
 class Register extends StatefulWidget {
   const Register({Key? key}) : super(key: key);
