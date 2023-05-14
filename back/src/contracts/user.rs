@@ -19,6 +19,14 @@ fn search_users(name: &str) -> Result<Json<Response<User>>, Json<Response<String
     }));
 }
 
+#[get("/getCurrentUser")]
+fn get_current_user(
+    token: AuthorizationToken,
+) -> Result<Json<Response<User>>, Json<Response<String>>> {
+    let execute = User::get_current_user(token.0);
+    Ok(Json(execute?))
+}
+
 #[get("/getUsers/<num>")]
 fn get_users(num: &str) -> Json<Response<Vec<User>>> {
     let users = User::read(num.parse().unwrap());
@@ -66,6 +74,7 @@ pub fn routes() -> Vec<Route> {
         add_user,
         delete_user,
         update_user,
-        get_all_users
+        get_all_users,
+        get_current_user
     ]
 }
