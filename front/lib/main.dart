@@ -1,23 +1,31 @@
-import 'package:checkit/pages/login.dart';
+import 'package:checkit/config/globals.dart';
+import 'package:checkit/helper/api_requests.dart';
+import 'package:checkit/router.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+
+  String? userToken = await storage.read(key: "userToken");
+  apiRequests.header = {
+    "Authorization": userToken ?? ''
+  };
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Checkit',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        // fontFamily: 'IBM Plex Sans Regular',
-      ),
-      home: const Login(),
+      return MaterialApp.router(
+        routerConfig: router,
+        title: 'Checkit',
+        theme: ThemeData(fontFamily: 'IBMPlexSans'),
+        debugShowCheckedModeBanner: false,
     );
   }
 }
