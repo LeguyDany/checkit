@@ -119,6 +119,28 @@ impl User {
         updated_value: &str,
         user_pwd: &str,
     ) -> Result<Response<String>, Response<String>> {
+        if updated_value.len() < 4 {
+            return Err(Response {
+                success: false,
+                data: "Please, enter new value with more than 4 characters.".to_string(),
+                status: 400,
+            });
+        };
+        if is_username == &true && updated_value.len() > 20 {
+            return Err(Response {
+                success: false,
+                data: "Please, enter an username with less than 20 characters.".to_string(),
+                status: 400,
+            });
+        };
+        if is_username == &true && User::get_user_by_username(updated_value).is_some() {
+            return Err(Response {
+                success: false,
+                data: "This username already exists, please choose another one.".to_string(),
+                status: 500,
+            });
+        }
+
         use crate::schema::schema::user::dsl::{pwd, user, userid, username};
 
         let decoded_token = Auth::decode_token(token)?.data;
@@ -141,7 +163,12 @@ impl User {
                 .execute(conn);
             updated_user = Auth::login(updated_value, user_pwd)?
         } else {
-            let password_hash = hash(updated_value.trim_end(), DEFAULT_COST).unwrap();
+            let password_hash =
+                hash(updated_value.trim_end(), DEFAULT_COST).map_err(|e| Response {
+                    success: false,
+                    data: format!("Error: {}", e.to_string()),
+                    status: 400,
+                })?;
             let _data = diesel::update(user.filter(userid.eq(decoded_token.user_token.userid)))
                 .set(pwd.eq(password_hash))
                 .execute(conn);
