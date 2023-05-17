@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:checkit/helper/api_requests.dart';
-import '../response.dart';
+import '../../models/response.dart';
 
 abstract class UserApi {
   Future<Response> apiResetUserPassword(String newPassword, String oldPassword) async {

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:checkit/controller/response.dart';
+import 'package:checkit/models/response.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 

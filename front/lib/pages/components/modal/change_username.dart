@@ -16,6 +16,7 @@ void modalChangeUsername(
 
   showModalBottomSheet<void>(
     isScrollControlled: true,
+    barrierColor: Colors.black.withOpacity(0.3),
     backgroundColor: white,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(

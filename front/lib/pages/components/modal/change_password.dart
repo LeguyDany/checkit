@@ -15,6 +15,7 @@ void modalResetPassword(
   final TextEditingController newPassword = TextEditingController();
 
   showModalBottomSheet<void>(
+    barrierColor: Colors.black.withOpacity(0.3),
     isScrollControlled: true,
     backgroundColor: white,
     shape: const RoundedRectangleBorder(

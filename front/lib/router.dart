@@ -1,5 +1,6 @@
 import 'package:checkit/pages/components/general/buttom_nav_bar.dart';
 import 'package:checkit/pages/components/general/header.dart';
+import 'package:checkit/pages/components/modal/add_task.dart';
 import 'package:checkit/pages/home.dart';
 import 'package:checkit/pages/login.dart';
 import 'package:checkit/pages/register.dart';

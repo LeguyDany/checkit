@@ -1,6 +1,6 @@
 import 'package:checkit/config/globals.dart';
 import 'package:checkit/controller/api/auth.dart';
-import 'package:checkit/controller/response.dart';
+import 'package:checkit/models/response.dart';
 import 'package:checkit/helper/api_requests.dart';
 
 class Auth extends AuthApi {

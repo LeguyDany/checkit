@@ -9,9 +9,7 @@ main() async {
   await dotenv.load(fileName: ".env");
 
   String? userToken = await storage.read(key: "userToken");
-  apiRequests.header = {
-    "Authorization": userToken ?? ''
-  };
+  apiRequests.header = {"Authorization": userToken ?? ''};
 
   runApp(const MyApp());
 }
@@ -21,11 +19,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      return MaterialApp.router(
-        routerConfig: router,
-        title: 'Checkit',
-        theme: ThemeData(fontFamily: 'IBMPlexSans'),
-        debugShowCheckedModeBanner: false,
+    return MaterialApp.router(
+      routerConfig: router,
+      title: 'Checkit',
+      theme: ThemeData(
+        dropdownMenuTheme: const DropdownMenuThemeData(
+          inputDecorationTheme: InputDecorationTheme(
+            isDense: true,
+           contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0)
+          )
+        ),
+        fontFamily: 'IBMPlexSans',
+        inputDecorationTheme: const InputDecorationTheme(
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+        ),
+      ),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

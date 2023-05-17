@@ -11,7 +11,7 @@ import 'package:checkit/pages/login.dart';
 import 'package:checkit/utils/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../controller/response.dart';
+import '../models/response.dart';
 import '../helper/api_requests.dart';
 
 class Settings extends StatefulWidget {
@@ -122,7 +122,7 @@ class _SettingsState extends State<Settings> {
                             marginTop: 10,
                             content: "Set",
                             onPress: () {
-                              print("TODO: SET NOTION PATH");
+                              //TODO: Setup Notion's API
                             },
                             isDisabled: false)
                       ],
