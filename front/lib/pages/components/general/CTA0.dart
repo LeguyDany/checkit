@@ -18,7 +18,7 @@ class CTA0 extends StatelessWidget {
         ElevatedButton(
           onPressed: isDisabled ? null : onPress,
           style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.fromLTRB(25, 8, 25, 13),
+            padding: const EdgeInsets.fromLTRB(25, 15, 25, 15),
             backgroundColor: isDisabled ? medium2 : red0,
             elevation: 0,
           ),

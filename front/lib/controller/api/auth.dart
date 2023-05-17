@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:checkit/controller/response.dart';
+import 'package:checkit/models/response.dart';
 import 'package:checkit/helper/api_requests.dart';
 
 abstract class AuthApi {

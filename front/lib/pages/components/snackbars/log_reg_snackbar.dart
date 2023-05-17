@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../controller/response.dart';
+import '../../../models/response.dart';
 import '../../../utils/loading.dart';
 
 Future<bool> notifySnackbar(BuildContext context, Future<Response> request,

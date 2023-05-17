@@ -1,0 +1,4 @@
+enum TemplateStatus {
+  inProgress,
+  finished
+}

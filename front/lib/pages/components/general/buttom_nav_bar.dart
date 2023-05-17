@@ -32,15 +32,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
               label: 'Templates',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.add, color: pageIndex == 2 ? red0 : medium2),
-              label: 'Add',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings, color: pageIndex == 3 ? red0 : medium2),
+              icon: Icon(Icons.settings, color: pageIndex == 2 ? red0 : medium2),
               label: 'Settings',
             ),
           ],
-          unselectedItemColor: Colors.red,
+          unselectedItemColor: medium2,
           selectedItemColor: red0,
           onTap: (index) {
             setState(() {

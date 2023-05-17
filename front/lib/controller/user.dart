@@ -1,5 +1,5 @@
 import 'package:checkit/controller/api/user.dart';
-import 'package:checkit/controller/response.dart';
+import 'package:checkit/models/response.dart';
 import '../config/globals.dart';
 import '../helper/api_requests.dart';
 

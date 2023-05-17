@@ -28,7 +28,7 @@ class Header extends StatelessWidget {
           ),
           Center(
             child: Container(
-              padding: const EdgeInsets.fromLTRB(30, 50, 30, 20),
+              padding: const EdgeInsets.fromLTRB(30, 60, 30, 20),
               child: Column(
                 children: [
                   Text(

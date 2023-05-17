@@ -20,7 +20,7 @@ const red3 = Color(0xfff7a1ac);
 
 // Font styles
 TextStyle getTextStyle(String type, Color color, [double? lineHeight]) {
-  final height = lineHeight ?? 0;
+  final height = lineHeight ?? 1;
   switch (type) {
     case "h1":
       return TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: color, height: height);
@@ -46,12 +46,15 @@ final shadow1 = BoxShadow(
   blurRadius: 10,
   offset: const Offset(0, -5), // changes position of shadow
 );
+final shadow2 = BoxShadow(
+  color: Colors.black.withOpacity(0.15),
+  blurRadius: 10,
+);
 
 // Global page index
 List<String> pagesList = [
   '/tasks',
   '/templates',
-  '/add',
   '/settings',
   '/login',
   '/register'

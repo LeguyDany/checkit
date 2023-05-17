@@ -19,7 +19,7 @@ class CTA2 extends StatelessWidget {
           onPressed: isDisabled ? null : onPress,
           style: OutlinedButton.styleFrom(
             side: const BorderSide(width: 2, color: red0),
-            padding: const EdgeInsets.fromLTRB(25, 8, 25, 13),
+            padding: const EdgeInsets.fromLTRB(25, 15, 25, 15),
             foregroundColor: isDisabled ? medium2 : red0,
             elevation: 0,
           ),
