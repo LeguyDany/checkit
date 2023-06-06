@@ -4,8 +4,8 @@ import 'package:checkit/router.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 
-main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+Future<void> main() async {
+  // WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
   String? userToken = await storage.read(key: "userToken");
