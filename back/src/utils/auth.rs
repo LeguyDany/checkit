@@ -1,10 +1,9 @@
-use std::env;
-
 use crate::models::user::User;
 use bcrypt::verify;
 use chrono::Utc;
 use dotenvy::dotenv;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
+use std::env;
 use uuid::Uuid;
 
 use crate::models::{
@@ -15,9 +14,8 @@ use crate::models::{
 use rocket::request::{self, FromRequest, Request};
 use rocket::{http::Status, outcome::Outcome};
 
-use crate::models::auth::{AuthorizationError, AuthorizationToken};
-
 use crate::configs::date::MONTH_IN_SEC;
+use crate::models::auth::{AuthorizationError, AuthorizationToken};
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthorizationToken {

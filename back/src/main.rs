@@ -4,6 +4,7 @@ extern crate rocket;
 mod configs;
 mod contracts;
 mod controllers;
+mod fairings;
 mod helpers;
 mod models;
 mod schema;
